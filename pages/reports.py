@@ -8,11 +8,31 @@ st.set_page_config(page_title="Reports", page_icon="📈", layout="wide")
 
 st.markdown("""
 <style>
-    div[data-testid="stMetric"] {
+    /* Main Background: Forest Green */
+    .stApp {
         background-color: #2E6F40;
+    }
+    
+    /* Sage Green Metric Cards with Dark Contrast Text */
+    div[data-testid="stMetric"] {
+        background-color: #87AE73;
         padding: 18px;
         border-radius: 12px;
-        border: 2px solid #87AE73;
+        border: 2px solid #1D4729;
+    }
+    div[data-testid="stMetric"] * {
+        color: #0D1B12 !important;
+    }
+
+    /* High Contrast Alert Boxes (st.info, st.warning, etc.) */
+    div[data-testid="stAlert"] {
+        background-color: #1D4729 !important;
+        border: 1px solid #87AE73 !important;
+        border-radius: 10px;
+    }
+    div[data-testid="stAlert"] * {
+        color: #FFFFFF !important;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -26,6 +46,10 @@ current_month_str = datetime.now(TIMEZONE).strftime("%Y-%m")
 df = get_sales()
 
 if df.empty:
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Sales Today", "0.00 ETB")
+    col2.metric("Items Sold Today", 0)
+    col3.metric("Total Revenue (Month)", "0.00 ETB")
     st.info("No sales data available yet.")
 else:
     try:
