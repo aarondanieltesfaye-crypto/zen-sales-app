@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 from services.google_sheets import fetch_worksheet_data, write_row, update_data
 
-# Local timezone setting (UTC+3)
+# Local timezone setting (East Africa Time UTC+3)
 TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
 
 def get_current_timestamp() -> str:
@@ -18,20 +18,33 @@ def get_products() -> pd.DataFrame:
         return df[df["Status"] == "Active"]
     return df
 
-def record_sale(product_name: str, quantity: int, unit_price: float, total_amount: float, company: str = "") -> bool:
+def record_sale(
+    product_name: str = "",
+    quantity: int = 1,
+    unit_price: float = 0.0,
+    total_amount: float = 0.0,
+    company: str = "",
+    buyer_name: str = "",
+    notes: str = "",
+    *args,
+    **kwargs
+) -> bool:
     """
-    Appends a new sale record with the correct local timestamp.
+    Appends a new sale record with timestamp and optional buyer details.
+    Accepts arbitrary arguments (*args, **kwargs) to prevent parameter errors from sales.py.
     """
     timestamp = get_current_timestamp()
     
-    # Matches standard sales sheet column layout
+    # Matches sales log columns
     row_data = [
         timestamp,
         product_name,
         quantity,
         unit_price,
         total_amount,
-        company
+        company,
+        buyer_name,
+        notes
     ]
     
     return write_row("Sales", row_data)
