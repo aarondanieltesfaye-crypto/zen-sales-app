@@ -1,45 +1,53 @@
 import streamlit as st
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import pandas as pd
 from google.oauth2.service_account import Credentials
+import pandas as pd
 
-def get_google_client():
-    """Authenticates and returns the gspread client using Streamlit secrets."""
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
+# Define Google Sheets API Scopes
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+def get_gspread_client():
+    """Authenticates with Google Sheets API using Streamlit Secrets."""
     creds_dict = dict(st.secrets["gcp_service_account"])
-    credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-    client = gspread.authorize(credentials)
-    return client
+    credentials = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+    return gspread.authorize(credentials)
 
-def get_sheet():
-    client = get_google_client()
-    sheet_id = st.secrets["app"]["spreadsheet_id"]
-    return client.open_by_key(sheet_id)
+def get_spreadsheet():
+    """Opens the target spreadsheet using the ID stored in secrets."""
+    client = get_gspread_client()
+    spreadsheet_id = st.secrets["spreadsheet_id"]
+    return client.open_by_key(spreadsheet_id)
 
-@st.cache_data(ttl=60)
-def fetch_worksheet_data(worksheet_name):
-    """Fetches data and caches it for 60 seconds unless manually cleared."""
-    sheet = get_sheet().worksheet(worksheet_name)
-    records = sheet.get_all_records()
-    return pd.DataFrame(records)
+@st.cache_data(ttl=600)
+def fetch_worksheet_data(worksheet_name: str) -> pd.DataFrame:
+    """
+    Fetches data from a specific tab and caches it in memory for 10 minutes (600s).
+    This prevents continuous API calls and stops CPU throttling errors.
+    """
+    try:
+        sh = get_spreadsheet()
+        worksheet = sh.worksheet(worksheet_name)
+        data = worksheet.get_all_records()
+        return pd.DataFrame(data)
+    except Exception as e:
+        st.error(f"Error fetching sheet '{worksheet_name}': {e}")
+        return pd.DataFrame()
 
-def write_row(worksheet_name, row_data):
-    sheet = get_sheet().worksheet(worksheet_name)
-    sheet.append_row(row_data)
-    st.cache_data.clear() # Clear cache to refresh dashboard
-
-def update_cell(worksheet_name, row_idx, col_idx, val):
-    sheet = get_sheet().worksheet(worksheet_name)
-    sheet.update_cell(row_idx, col_idx, val)
-    st.cache_data.clear()
-    
-def update_dataframe(worksheet_name, df):
-    """Overwrites the worksheet with a new DataFrame (useful for full re-syncs)."""
-    sheet = get_sheet().worksheet(worksheet_name)
-    sheet.clear()
-    sheet.update([df.columns.values.tolist()] + df.values.tolist())
-    st.cache_data.clear()
+def write_row(worksheet_name: str, row_data: list) -> bool:
+    """
+    Appends a new row to the specified tab and clears the cache
+    so the app displays the new data immediately.
+    """
+    try:
+        sh = get_spreadsheet()
+        worksheet = sh.worksheet(worksheet_name)
+        worksheet.append_row(row_data)
+        # Clear cache so subsequent reads fetch fresh data
+        st.cache_data.clear()
+        return True
+    except Exception as e:
+        st.error(f"Error writing to sheet '{worksheet_name}': {e}")
+        return False
