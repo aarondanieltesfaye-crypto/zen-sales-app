@@ -11,6 +11,8 @@ def get_products() -> pd.DataFrame:
     df = fetch_worksheet_data("Products")
     if not df.empty and "Status" in df.columns:
         return df[df["Status"] == "Active"]
+    elif not df.empty and "Active" in df.columns:
+        return df[df["Active"].astype(str).str.upper() == "TRUE"]
     return df
 
 def record_sale(
@@ -27,7 +29,9 @@ def record_sale(
     **kwargs
 ) -> bool:
     """
-    Appends a sale record to Sales (Columns A-M) and logs to Inventory_Transactions (Columns A-J).
+    1. Appends sale to Sales sheet.
+    2. Logs change to Inventory_Transactions sheet.
+    3. Updates Current_Stock in Products sheet.
     """
     now = datetime.now(TIMEZONE)
     date_only = now.strftime("%Y-%m-%d")         
@@ -44,26 +48,39 @@ def record_sale(
     buyer = buyer_name if buyer_name else "-"
     note = notes if notes else "-"
 
-    # Sales tab row (Columns A through M)
+    # 1. Save to Sales sheet
     sales_row = [
         sale_id, date_only, p_id, comp, prod,
         int(quantity), float(unit_price), calc_total,
         "-", pay, buyer, "-", note
     ]
-    
     sales_success = write_row("Sales", sales_row)
 
-    # Inventory_Transactions tab row (Columns A through J)
+    # 2. Save to Inventory_Transactions sheet
     inv_row = [
         txn_id, date_only, p_id, comp, prod,
         "Sale", -int(quantity), f"Sale ({sale_id})",
         "-", timestamp_str
     ]
-    
     try:
         write_row("Inventory_Transactions", inv_row)
     except Exception as e:
-        st.warning(f"Sale logged, but inventory transaction table update failed: {e}")
+        st.warning(f"Sale recorded, but inventory transaction log failed: {e}")
+
+    # 3. Deduct stock from Products sheet
+    try:
+        products_df = fetch_worksheet_data("Products")
+        if not products_df.empty and "Product_ID" in products_df.columns and "Current_Stock" in products_df.columns:
+            match_idx = products_df.index[products_df["Product_ID"] == p_id].tolist()
+            if match_idx:
+                row_i = match_idx[0]
+                current_val = pd.to_numeric(products_df.loc[row_i, "Current_Stock"], errors="coerce")
+                current_val = 0 if pd.isna(current_val) else int(current_val)
+                
+                products_df.loc[row_i, "Current_Stock"] = max(0, current_val - int(quantity))
+                update_data("Products", products_df)
+    except Exception as e:
+        st.warning(f"Sale recorded, but stock level update in Products sheet failed: {e}")
 
     return sales_success
 
