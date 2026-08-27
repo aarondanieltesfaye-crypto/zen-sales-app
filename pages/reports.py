@@ -9,10 +9,10 @@ st.set_page_config(page_title="Reports", page_icon="📈", layout="wide")
 st.markdown("""
 <style>
     div[data-testid="stMetric"] {
-        background-color: #1E293B;
+        background-color: #2E6F40;
         padding: 18px;
         border-radius: 12px;
-        border: 1px solid #334155;
+        border: 2px solid #87AE73;
     }
 </style>
 """, unsafe_allow_html=True)
