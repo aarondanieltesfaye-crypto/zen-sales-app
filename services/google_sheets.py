@@ -3,6 +3,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 
+# Google Sheets API Scopes
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -15,15 +16,26 @@ def get_gspread_client():
     return gspread.authorize(credentials)
 
 def get_spreadsheet():
-    """Opens the target spreadsheet using the ID stored in secrets."""
+    """Opens the target spreadsheet with multiple fallbacks for the ID."""
     client = get_gspread_client()
-    spreadsheet_id = st.secrets["spreadsheet_id"]
+    
+    # Check top-level secrets
+    if "spreadsheet_id" in st.secrets:
+        spreadsheet_id = st.secrets["spreadsheet_id"]
+    # Check [app] section in secrets
+    elif "app" in st.secrets and "spreadsheet_id" in st.secrets["app"]:
+        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+    # Hardcoded fallback as a safety net
+    else:
+        spreadsheet_id = "1Auhm-mnKHgr2YkvUfM0MebHgJ1GROrhXt1rVn3NjJs0"
+        
     return client.open_by_key(spreadsheet_id)
 
 @st.cache_data(ttl=600)
 def fetch_worksheet_data(worksheet_name: str) -> pd.DataFrame:
     """
     Fetches data from a specific tab and caches it in memory for 10 minutes.
+    Prevents CPU throttling and continuous API calls.
     """
     try:
         sh = get_spreadsheet()
