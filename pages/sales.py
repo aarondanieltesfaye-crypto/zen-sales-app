@@ -1,56 +1,61 @@
 import streamlit as st
 from services.data_service import get_products, record_sale
-from utils.validation import validate_sale_input
 
 st.title("🛒 Record a Sale")
 
+# Fetch products dataframe
 products_df = get_products()
+
 if products_df.empty:
-    st.warning("No active products found. Add products first.")
+    st.warning("No active products found in inventory. Please add products first.")
 else:
-    with st.form("sale_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            company = st.selectbox("Company", products_df['Company'].unique())
-            company_prods = products_df[products_df['Company'] == company]
-            
-            # Format product display: Name (Stock: X - Price: Y)
-            prod_options = company_prods.apply(lambda row: f"{row['Product_Name']} (Stock: {row['Current_Stock']})", axis=1).tolist()
-            selected_prod_str = st.selectbox("Product", prod_options)
-            
-            # Extract real product details
-            idx = prod_options.index(selected_prod_str)
-            selected_product = company_prods.iloc[idx]
-            
-            qty = st.number_input("Quantity", min_value=1, step=1)
-            
-        with col2:
-            price = st.number_input("Selling Price (ETB)", value=float(selected_product['Selling_Price']))
-            payment_method = st.selectbox("Payment Method", ["Cash", "CBE Transfer", "POS", "Gift", "Other"])
-            buyer = st.text_input("Buyer Name (Optional)")
-            notes = st.text_input("Notes (Optional)")
-            
-        st.info(f"Gross Total: ETB {qty * price:,.2f}")
+    # 1. Company Selection
+    if "Company" in products_df.columns:
+        companies = sorted(products_df["Company"].dropna().unique().tolist())
+        selected_company = st.selectbox("Company", companies)
         
-        submitted = st.form_submit_button("Complete Sale", type="primary")
+        # Filter products strictly by the selected company
+        filtered_products = products_df[products_df["Company"] == selected_company]
+    else:
+        selected_company = "-"
+        filtered_products = products_df
+
+    # 2. Product Selection (now filtered)
+    if not filtered_products.empty and "Product_Name" in filtered_products.columns:
+        product_names = filtered_products["Product_Name"].tolist()
+        selected_product_name = st.selectbox("Product", product_names)
         
-        if submitted:
-            valid, msg = validate_sale_input(qty, int(selected_product['Current_Stock']), price)
-            if not valid:
-                st.error(msg)
-            else:
-                try:
-                    record_sale(
-                        product_id=selected_product['Product_ID'],
-                        company=company,
-                        product_name=selected_product['Product_Name'],
-                        qty=qty,
-                        unit_price=price,
-                        payment_method=payment_method,
-                        buyer=buyer,
-                        receptionist=st.session_state.get("role", "Unknown"),
-                        notes=notes
-                    )
-                    st.success("Sale recorded successfully!")
-                except Exception as e:
-                    st.error(f"Error saving to database. Ensure connection is stable.")
+        # Get details for the selected product row
+        product_row = filtered_products[filtered_products["Product_Name"] == selected_product_name].iloc[0]
+        
+        # Automatically pull unit price and available stock if columns exist
+        unit_price = float(product_row.get("Price", product_row.get("Unit_Price", 0.0)))
+    else:
+        st.error("No products found for this company.")
+        selected_product_name = ""
+        unit_price = 0.0
+
+    # Rest of your sales form inputs...
+    quantity = st.number_input("Quantity", min_value=1, value=1)
+    payment_method = st.selectbox("Payment Method", ["Cash", "Bank Transfer", "Credit"])
+    buyer_name = st.text_input("Buyer Name (Optional)")
+    notes = st.text_input("Notes (Optional)")
+
+    # Calculate gross total
+    gross_total = quantity * unit_price
+    st.info(f"Gross Total: ETB {gross_total:,.2f}")
+
+    if st.button("Complete Sale"):
+        success = record_sale(
+            product_name=selected_product_name,
+            quantity=quantity,
+            unit_price=unit_price,
+            total_amount=gross_total,
+            company=selected_company,
+            buyer_name=buyer_name,
+            notes=notes
+        )
+        if success:
+            st.success("Sale recorded successfully!")
+        else:
+            st.error("Error saving to database. Ensure connection is stable.")
