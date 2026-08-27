@@ -30,21 +30,26 @@ def record_sale(
     **kwargs
 ) -> bool:
     """
-    Appends a new sale record with timestamp and optional buyer details.
-    Accepts arbitrary arguments (*args, **kwargs) to prevent parameter errors from sales.py.
+    Appends a new sale record exactly aligned with the Google Sheets columns.
     """
     timestamp = get_current_timestamp()
+    # Generates a unique ID like S-20260827103137
+    sale_id = datetime.now(TIMEZONE).strftime("S-%Y%m%d%H%M%S") 
     
-    # Matches sales log columns
+    # This list now perfectly matches columns A through L in your sheet
     row_data = [
-        timestamp,
-        product_name,
-        quantity,
-        unit_price,
-        total_amount,
-        company,
-        buyer_name,
-        notes
+        sale_id,             # Column A: Sale_ID
+        timestamp,           # Column B: Date
+        "",                  # Column C: Product_ID (Leaving blank if not provided)
+        company,             # Column D: Company
+        product_name,        # Column E: Product_Name
+        quantity,            # Column F: Quantity
+        unit_price,          # Column G: Unit_Selling_Price
+        total_amount,        # Column H: Total_Sale
+        "",                  # Column I: Zen_Revenue (Leave blank for sheet formulas)
+        "",                  # Column J: Payment_Method 
+        buyer_name,          # Column K: Buyer
+        notes                # Column L: Notes/Receipt
     ]
     
     return write_row("Sales", row_data)
