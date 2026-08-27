@@ -4,36 +4,42 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from services.data_service import get_sales
 
-st.title("📊 Sales & Inventory Reports")
+st.set_page_config(page_title="Reports", page_icon="📈", layout="wide")
+
+st.markdown("""
+<style>
+    div[data-testid="stMetric"] {
+        background-color: #1E293B;
+        padding: 18px;
+        border-radius: 12px;
+        border: 1px solid #334155;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("📈 Sales & Inventory Reports")
 
 TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
 today_str = datetime.now(TIMEZONE).strftime("%Y-%m-%d")
 current_month_str = datetime.now(TIMEZONE).strftime("%Y-%m")
 
-# Fetch sales data
 df = get_sales()
 
 if df.empty:
     st.info("No sales data available yet.")
 else:
     try:
-        # Clean and convert numeric columns safely
         df["Total_Sale"] = pd.to_numeric(df["Total_Sale"], errors="coerce").fillna(0)
         df["Quantity"] = pd.to_numeric(df["Quantity"], errors="coerce").fillna(0)
-        
-        # Isolate just the YYYY-MM-DD string from the date column
         df["Date_Str"] = df["Date"].astype(str).str.slice(0, 10)
 
-        # Calculate metrics for today
         today_df = df[df["Date_Str"] == today_str]
         total_sales_today = today_df["Total_Sale"].sum()
         items_sold_today = today_df["Quantity"].sum()
 
-        # Calculate metrics for the current month
         month_df = df[df["Date_Str"].str.startswith(current_month_str)]
         total_revenue_month = month_df["Total_Sale"].sum()
 
-        # Display Top Metrics Cards
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Sales Today", f"{total_sales_today:,.2f} ETB")
         col2.metric("Items Sold Today", int(items_sold_today))
@@ -41,7 +47,6 @@ else:
 
         st.markdown("---")
 
-        # Display Breakdown Sections & Charts
         c1, c2 = st.columns(2)
         
         with c1:
