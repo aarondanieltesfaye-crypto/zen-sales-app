@@ -1,64 +1,41 @@
-import pandas as pd
-import uuid
 from datetime import datetime
-from services.google_sheets import fetch_worksheet_data, write_row, update_dataframe
-from utils.calculations import calculate_zen_revenue
+from zoneinfo import ZoneInfo
+import pandas as pd
+import streamlit as st
+from services.google_sheets import fetch_worksheet_data, write_row, update_data
 
-def get_products():
+# Local timezone setting (UTC+3)
+TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
+
+def get_current_timestamp() -> str:
+    """Returns the current timestamp formatted in local East Africa Time."""
+    return datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
+
+def get_products() -> pd.DataFrame:
+    """Fetches products from the Google Sheet."""
     df = fetch_worksheet_data("Products")
-    return df[df['Active'] == 'TRUE'] if not df.empty else df
+    if not df.empty and "Status" in df.columns:
+        return df[df["Status"] == "Active"]
+    return df
 
-def get_sales():
+def record_sale(product_name: str, quantity: int, unit_price: float, total_amount: float, company: str = "") -> bool:
+    """
+    Appends a new sale record with the correct local timestamp.
+    """
+    timestamp = get_current_timestamp()
+    
+    # Matches standard sales sheet column layout
+    row_data = [
+        timestamp,
+        product_name,
+        quantity,
+        unit_price,
+        total_amount,
+        company
+    ]
+    
+    return write_row("Sales", row_data)
+
+def get_sales() -> pd.DataFrame:
+    """Fetches all recorded sales from the Google Sheet."""
     return fetch_worksheet_data("Sales")
-
-def get_inventory_transactions():
-    return fetch_worksheet_data("Inventory_Transactions")
-
-def get_settings():
-    return fetch_worksheet_data("Settings")
-
-def record_sale(product_id, company, product_name, qty, unit_price, payment_method, buyer, receptionist, notes):
-    products = get_products()
-    product = products[products['Product_ID'] == product_id].iloc[0]
-    
-    # Calculate revenue
-    gross_sale = qty * unit_price
-    comm_type = product['Commission_Type']
-    comm_val = product['Commission_Value']
-    zen_revenue = calculate_zen_revenue(gross_sale, qty, comm_type, comm_val)
-    
-    sale_id = f"SALE-{uuid.uuid4().hex[:8].upper()}"
-    date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # 1. Write Sale
-    sale_row = [sale_id, date_str, product_id, company, product_name, qty, unit_price, 
-                gross_sale, zen_revenue, payment_method, buyer, receptionist, notes, "Active", date_str]
-    write_row("Sales", sale_row)
-    
-    # 2. Record Inventory Transaction
-    trans_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
-    txn_row = [trans_id, date_str, product_id, company, product_name, "Sale", -qty, f"Sale {sale_id}", receptionist, date_str]
-    write_row("Inventory_Transactions", txn_row)
-    
-    # 3. Update Current Stock in Products sheet
-    update_product_stock(product_id, -qty)
-    return sale_id
-
-def update_product_stock(product_id, qty_change):
-    products_df = fetch_worksheet_data("Products")
-    row_idx = products_df.index[products_df['Product_ID'] == product_id].tolist()[0]
-    new_stock = int(products_df.at[row_idx, 'Current_Stock']) + qty_change
-    products_df.at[row_idx, 'Current_Stock'] = new_stock
-    update_dataframe("Products", products_df)
-
-def adjust_inventory(product_id, qty_change, reason, receptionist, notes):
-    products = get_products()
-    product = products[products['Product_ID'] == product_id].iloc[0]
-    
-    trans_id = f"TXN-{uuid.uuid4().hex[:8].upper()}"
-    date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    txn_row = [trans_id, date_str, product_id, product['Company'], product['Product_Name'], 
-               reason, qty_change, notes, receptionist, date_str]
-    write_row("Inventory_Transactions", txn_row)
-    update_product_stock(product_id, qty_change)
