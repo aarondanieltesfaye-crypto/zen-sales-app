@@ -3,7 +3,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 
-# Define Google Sheets API Scopes
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -24,8 +23,7 @@ def get_spreadsheet():
 @st.cache_data(ttl=600)
 def fetch_worksheet_data(worksheet_name: str) -> pd.DataFrame:
     """
-    Fetches data from a specific tab and caches it in memory for 10 minutes (600s).
-    This prevents continuous API calls and stops CPU throttling errors.
+    Fetches data from a specific tab and caches it in memory for 10 minutes.
     """
     try:
         sh = get_spreadsheet()
@@ -38,16 +36,37 @@ def fetch_worksheet_data(worksheet_name: str) -> pd.DataFrame:
 
 def write_row(worksheet_name: str, row_data: list) -> bool:
     """
-    Appends a new row to the specified tab and clears the cache
-    so the app displays the new data immediately.
+    Appends a new row to the specified tab and clears the cache.
     """
     try:
         sh = get_spreadsheet()
         worksheet = sh.worksheet(worksheet_name)
         worksheet.append_row(row_data)
-        # Clear cache so subsequent reads fetch fresh data
         st.cache_data.clear()
         return True
     except Exception as e:
         st.error(f"Error writing to sheet '{worksheet_name}': {e}")
         return False
+
+def update_data(worksheet_name: str, data) -> bool:
+    """
+    Updates or overwrites data in a worksheet and clears the cache.
+    """
+    try:
+        sh = get_spreadsheet()
+        worksheet = sh.worksheet(worksheet_name)
+        if isinstance(data, pd.DataFrame):
+            worksheet.clear()
+            worksheet.update([data.columns.values.tolist()] + data.values.tolist())
+        elif isinstance(data, list):
+            worksheet.clear()
+            worksheet.update(data)
+        st.cache_data.clear()
+        return True
+    except Exception as e:
+        st.error(f"Error updating sheet '{worksheet_name}': {e}")
+        return False
+
+# Function aliases to match any import variation in data_service.py
+update_dataframe = update_data
+update_row = update_data
