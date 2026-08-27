@@ -1,0 +1,299 @@
+Product_ID,Company,Product_Name,Category,Initial_Stock,Current_Stock,Cost_Price,Selling_Price,Commission_Type,Commission_Value,Active,Low_Stock_Threshold
+SAB-3B3DA,Sabahar,100% Cotton Hand Towel 50x80,Textiles,4,4,0.0,400.0,Percentage,20,TRUE,5
+SAB-60EE5,Sabahar,Degu Scarf,Textiles,1,1,0.0,700.0,Percentage,20,TRUE,5
+SAB-3117D,Sabahar,Noah Scarf/ line/ 45x200,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-693AF,Sabahar,Beach Towel 100x180 cm,Textiles,7,7,0.0,1050.0,Percentage,20,TRUE,5
+SAB-4D6C8,Sabahar,Zenach Throw,Textiles,3,3,0.0,2300.0,Percentage,20,TRUE,5
+SAB-F43AF,Sabahar,Judith Shawl 75x210,Textiles,1,1,0.0,950.0,Percentage,20,TRUE,5
+SAB-88831,Sabahar,Stella Shawl 70x200,Textiles,1,1,0.0,1700.0,Percentage,20,TRUE,5
+SAB-F8C23,Sabahar,Yeshi Shawl 70x200cm,Textiles,1,1,0.0,850.0,Percentage,20,TRUE,5
+SAB-E5CF4,Sabahar,Maraki,Textiles,1,1,0.0,850.0,Percentage,20,TRUE,5
+SAB-CC822,Sabahar,Plaid Shawl Wool,Textiles,1,1,0.0,1600.0,Percentage,20,TRUE,5
+SAB-8D6A1,Sabahar,Joy Shawl 70x200,Textiles,1,1,0.0,700.0,Percentage,20,TRUE,5
+SAB-AC317,Sabahar,Tabita Scarf 45x200cm,Textiles,1,1,0.0,600.0,Percentage,20,TRUE,5
+SAB-2A938,Sabahar,Henock Scarf 45x200cm,Textiles,2,2,0.0,850.0,Percentage,20,TRUE,5
+SAB-77729,Sabahar,Total,Textiles,25,25,0.0,0.0,Percentage,20,TRUE,5
+SAB-04895,Sabahar,Wubet shawel 70*200,Textiles,2,2,0.0,850.0,Percentage,20,TRUE,5
+SAB-08EB9,Sabahar,Henock scarf 45*200,Textiles,3,3,0.0,850.0,Percentage,20,TRUE,5
+SAB-0DC9F,Sabahar,Habesha Shawl (with tibeb) 70*200,Textiles,3,3,0.0,900.0,Percentage,20,TRUE,5
+SAB-F9132,Sabahar,100% cotton hand towel 50*200,Textiles,30,30,0.0,400.0,Percentage,20,TRUE,5
+SAB-16B0B,Sabahar,Danakil 45*200,Textiles,1,1,0.0,0.0,Percentage,20,TRUE,5
+SAB-21926,Sabahar,Beach towel,Textiles,2,2,0.0,0.0,Percentage,20,TRUE,5
+SAB-508E6,Sabahar,"table runner ,fetel(ribbons,rainbow,ocean blue)",Textiles,1,1,0.0,0.0,Percentage,20,TRUE,5
+SAB-A93E9,Sabahar,Maraki,Textiles,8,8,0.0,850.0,Percentage,20,TRUE,5
+SAB-80798,Sabahar,Judith shawl 75*210,Textiles,6,6,0.0,950.0,Percentage,20,TRUE,5
+SAB-25A1B,Sabahar,timket shawl,Textiles,2,2,0.0,0.0,Percentage,20,TRUE,5
+SAB-980F6,Sabahar,joy shawl 70*200,Textiles,2,2,0.0,1700.0,Percentage,20,TRUE,5
+SAB-DB1A5,Sabahar,Debora Shawl,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-8936B,Sabahar,queen taita,Textiles,1,1,0.0,900.0,Percentage,20,TRUE,5
+SAB-5F429,Sabahar,beach towel 100*180,Textiles,8,8,0.0,1050.0,Percentage,20,TRUE,5
+SAB-721FB,Sabahar,yeshishawl 70*200 cm,Textiles,3,3,0.0,850.0,Percentage,20,TRUE,5
+SAB-2EE69,Sabahar,Kaftan Small,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-65781,Sabahar,Nora Shawl,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-7926F,Sabahar,Silk Mul/Eri Thick Scarf 30/160,Textiles,0,0,0.0,2.0,Percentage,20,TRUE,5
+SAB-90D6C,Sabahar,telba scarf 45*200cm,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-DA93B,Sabahar,Queen Taitu Shawl 70*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-F3440,Sabahar,Facil Scarf,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-CC744,Sabahar,Cotton Bath towel 100*180,Textiles,0,0,0.0,2.0,Percentage,20,TRUE,5
+SAB-7B4AD,Sabahar,Danakil Scarf 45*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-F0520,Sabahar,Zenach Pillow,Textiles,0,0,0.0,5.0,Percentage,20,TRUE,5
+SAB-12C4A,Sabahar,Akobo Cushion,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-CB675,Sabahar,Tow Tone pillow 50*50,Textiles,0,0,0.0,3.0,Percentage,20,TRUE,5
+SAB-B1B62,Sabahar,Bath Mat 60*90cm,Textiles,0,0,0.0,8.0,Percentage,20,TRUE,5
+SAB-D7347,Sabahar,Tusser Shawl,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-99D48,Sabahar,timket Shawl 70*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-E944A,Sabahar,Dani Shawl 70*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-0B552,Sabahar,Stella Shawl 70*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-B9956,Sabahar,Fasil Shawl,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-78214,Sabahar,Debora Shawl 70*200,Textiles,0,0,0.0,1.0,Percentage,20,TRUE,5
+SAB-96E18,Sabahar,Wubet Shawl 70*200cm,Textiles,0,0,0.0,2.0,Percentage,20,TRUE,5
+SAB-424B0,Sabahar,waffel hand towel,Textiles,2,2,0.0,332.0,Percentage,20,TRUE,5
+SAB-4CF16,Sabahar,Hand towel,Textiles,24,24,0.0,297.0,Percentage,20,TRUE,5
+SAB-5A208,Sabahar,almaz hand towel,Textiles,2,2,0.0,297.0,Percentage,20,TRUE,5
+SAB-A8175,Sabahar,Zinach throw,Textiles,1,1,0.0,1656.0,Percentage,20,TRUE,5
+SAB-EC255,Sabahar,beach towel,Textiles,5,5,0.0,960.0,Percentage,20,TRUE,5
+SAB-D0904,Sabahar,Anna Throw,Textiles,2,2,0.0,1788.0,Percentage,20,TRUE,5
+SAB-1A271,Sabahar,Desta throw,Textiles,1,1,0.0,1788.0,Percentage,20,TRUE,5
+SAB-47FA0,Sabahar,winter scarf,Textiles,2,2,0.0,1325.0,Percentage,20,TRUE,5
+SAB-F3D51,Sabahar,yohannes scarf,Textiles,1,1,0.0,894.0,Percentage,20,TRUE,5
+SAB-D04DC,Sabahar,flash shawl,Textiles,1,1,0.0,894.0,Percentage,20,TRUE,5
+SAB-F63B8,Sabahar,queen taitu shawl,Textiles,1,1,0.0,728.0,Percentage,20,TRUE,5
+SAB-A51CA,Sabahar,facil scarf,Textiles,1,1,0.0,663.0,Percentage,20,TRUE,5
+SAB-BED76,Sabahar,Habesha showl,Textiles,1,1,0.0,729.0,Percentage,20,TRUE,5
+SAB-4F2F7,Sabahar,Dani shawl,Textiles,1,1,0.0,729.0,Percentage,20,TRUE,5
+SAB-12D60,Sabahar,tabita shawl,Textiles,1,1,0.0,729.0,Percentage,20,TRUE,5
+SAB-BF2D1,Sabahar,Fasil shawl,Textiles,1,1,0.0,1192.0,Percentage,20,TRUE,5
+SAB-5036E,Sabahar,Debora shawl,Textiles,1,1,0.0,894.0,Percentage,20,TRUE,5
+SAB-0250A,Sabahar,Queen cllon scarf,Textiles,1,1,0.0,994.0,Percentage,20,TRUE,5
+SAB-7FC0A,Sabahar,desta showl,Textiles,1,1,0.0,612.0,Percentage,20,TRUE,5
+SAB-1E8D5,Sabahar,DESCRIBTION,Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+SAB-557A6,Sabahar,kokeb scarf,Textiles,1,1,0.0,743.48,Percentage,20,TRUE,5
+SAB-82E79,Sabahar,sarong,Textiles,1,1,0.0,1408.7,Percentage,20,TRUE,5
+SAB-0C0FF,Sabahar,cotton fetel naokin,Textiles,2,2,0.0,172.17,Percentage,20,TRUE,5
+SAB-4FB31,Sabahar,Almaz hand towel,Textiles,3,3,0.0,352.17,Percentage,20,TRUE,5
+SAB-0F788,Sabahar,cotten habd towel,Textiles,1,1,0.0,352.17,Percentage,20,TRUE,5
+SAB-7182B,Sabahar,Min bag sabhar,Textiles,6,6,0.0,391.3,Percentage,20,TRUE,5
+SAB-3436D,Sabahar,Desta shawl,Textiles,2,2,0.0,860.87,Percentage,20,TRUE,5
+SAB-2789D,Sabahar,Queen taitu shawl,Textiles,1,1,0.0,860.87,Percentage,20,TRUE,5
+SAB-50D5E,Sabahar,Yeshi shawl,Textiles,1,1,0.0,743.48,Percentage,20,TRUE,5
+SAB-C6353,Sabahar,Degu scarf,Textiles,1,1,0.0,665.22,Percentage,20,TRUE,5
+SAB-2C164,Sabahar,Deborah shawl,Textiles,1,1,0.0,1056.52,Percentage,20,TRUE,5
+SAB-9593D,Sabahar,Dani shawl,Textiles,5,5,0.0,860.86,Percentage,20,TRUE,5
+SAB-BC2E8,Sabahar,Telba scarf,Textiles,1,1,0.0,900.0,Percentage,20,TRUE,5
+SAB-EE4B0,Sabahar,Silk Mul/ Eric thick scarf,Textiles,2,2,0.0,782.61,Percentage,20,TRUE,5
+SAB-D9BF6,Sabahar,Petra scarf,Textiles,1,1,0.0,469.57,Percentage,20,TRUE,5
+SAB-2262D,Sabahar,Air shawl,Textiles,3,3,0.0,743.48,Percentage,20,TRUE,5
+SAB-8E4B3,Sabahar,Linen shawl,Textiles,1,1,0.0,1252.17,Percentage,20,TRUE,5
+SAB-0A252,Sabahar,Maraki Shawl,Textiles,1,1,0.0,743.48,Percentage,20,TRUE,5
+SAB-ABDA5,Sabahar,Silk mul / Eri thin shawl,Textiles,1,1,0.0,1721.74,Percentage,20,TRUE,5
+SAB-24CD1,Sabahar,Judith shawl,Textiles,1,1,0.0,900.0,Percentage,20,TRUE,5
+SAB-93DF0,Sabahar,Describtion,Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+SAB-8E925,Sabahar,Air Shawl,Textiles,1,1,0.0,950.0,Percentage,20,TRUE,5
+SAB-70EDE,Sabahar,Fasil Shawl,Textiles,1,1,0.0,1800.0,Percentage,20,TRUE,5
+SAB-747A4,Sabahar,Linen Shawl,Textiles,1,1,0.0,1600.0,Percentage,20,TRUE,5
+SAB-F568C,Sabahar,Linen Shawl,Textiles,1,1,0.0,1450.0,Percentage,20,TRUE,5
+SAB-B0EF1,Sabahar,Dani shawl,Textiles,1,1,0.0,110.0,Percentage,20,TRUE,5
+SAB-A8226,Sabahar,Air Shawel scarf,Textiles,1,1,0.0,950.0,Percentage,20,TRUE,5
+SAB-11C31,Sabahar,Degu Scard,Textiles,1,1,0.0,850.0,Percentage,20,TRUE,5
+SAB-A4736,Sabahar,Petra Scarf,Textiles,1,1,0.0,600.0,Percentage,20,TRUE,5
+SAB-6060B,Sabahar,Describtion,Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+SAB-4FF5A,Sabahar,Small Bag,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-A9FC7,Sabahar,Scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-A58F8,Sabahar,Scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-72467,Sabahar,Scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-C4BDA,Sabahar,Small Bag,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-F4DCA,Sabahar,sebhar scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-D27C4,Sabahar,sebhar scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-B4B07,Sabahar,sebhar scarf,Textiles,1,1,0.0,959.0,Percentage,20,TRUE,5
+SAB-E6885,Sabahar,sebhar scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-5E648,Sabahar,sebhar scarf,Textiles,1,1,0.0,1150.0,Percentage,20,TRUE,5
+SAB-1D2BA,Sabahar,sebhar scarf,Textiles,1,1,0.0,1450.0,Percentage,20,TRUE,5
+SAB-D57C8,Sabahar,sebhar scarf,Textiles,1,1,0.0,1100.0,Percentage,20,TRUE,5
+SAB-A3FA7,Sabahar,Bere Har Scarf,Textiles,1,1,0.0,3000.0,Percentage,20,TRUE,5
+SAB-6A117,Sabahar,Sabahar Scarf,Textiles,2,2,0.0,2900.0,Percentage,20,TRUE,5
+SAB-DC8C3,Sabahar,"Febrary 18,2025 - April 30,2025",Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+SAB-2B3B0,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,2600.0,Percentage,20,TRUE,5
+SAB-92128,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,2000.0,Percentage,20,TRUE,5
+SAB-337F3,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,2000.0,Percentage,20,TRUE,5
+SAB-A1C5C,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,2100.0,Percentage,20,TRUE,5
+SAB-8DD2A,Sabahar,Sebhar Scarf,Textiles,2,2,0.0,950.0,Percentage,20,TRUE,5
+SAB-7A76C,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-104D8,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,1550.0,Percentage,20,TRUE,5
+SAB-A778F,Sabahar,Sebhar Scarf,Textiles,1,1,0.0,1500.0,Percentage,20,TRUE,5
+SAB-B8139,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-541CE,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-C471C,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-4533C,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-398B5,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-5B754,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-59F20,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-DC46B,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-F3A37,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-A7606,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-6E67E,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,500.0,Percentage,20,TRUE,5
+SAB-2F62C,Sabahar,Bedside Mat,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-7ACEE,Sabahar,Bedside Mat,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-F5C59,Sabahar,Bedside Mat,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-CEFC2,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3500.0,Percentage,20,TRUE,5
+SAB-335C9,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-0F851,Sabahar,Saphar Scarp,Textiles,1,1,0.0,4000.0,Percentage,20,TRUE,5
+SAB-9F594,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2300.0,Percentage,20,TRUE,5
+SAB-D0BA9,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3300.0,Percentage,20,TRUE,5
+SAB-622CC,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2900.0,Percentage,20,TRUE,5
+SAB-DFFD7,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2700.0,Percentage,20,TRUE,5
+SAB-36D47,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-6CB4C,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-4807D,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3900.0,Percentage,20,TRUE,5
+SAB-2CEA4,Sabahar,Saphar Scarp,Textiles,1,1,0.0,4000.0,Percentage,20,TRUE,5
+SAB-B60E9,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2000.0,Percentage,20,TRUE,5
+SAB-5CF94,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-087FE,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-8E6E5,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-4A962,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-C4D2E,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3300.0,Percentage,20,TRUE,5
+SAB-D38FD,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-E8A40,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2700.0,Percentage,20,TRUE,5
+SAB-F9D9C,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2300.0,Percentage,20,TRUE,5
+SAB-B0153,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3000.0,Percentage,20,TRUE,5
+SAB-15B49,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3900.0,Percentage,20,TRUE,5
+SAB-A8F27,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-190A6,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-60F17,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-E819C,Sabahar,Saphar Scarp,Textiles,1,1,0.0,4000.0,Percentage,20,TRUE,5
+SAB-A6746,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2300.0,Percentage,20,TRUE,5
+SAB-C1D02,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-A6E7F,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-666A1,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2300.0,Percentage,20,TRUE,5
+SAB-3BE68,Sabahar,Saphar Scarp,Textiles,1,1,0.0,2700.0,Percentage,20,TRUE,5
+SAB-6C5B3,Sabahar,Saphar Scarp,Textiles,1,1,0.0,3050.0,Percentage,20,TRUE,5
+SAB-21256,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-AD1B1,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-A78DC,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-3F0FF,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-4F614,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-49390,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-C4A16,Sabahar,Hand towel Sabhar,Textiles,1,1,0.0,800.0,Percentage,20,TRUE,5
+SAB-72253,Sabahar,Beach Towel,Textiles,1,1,0.0,3850.0,Percentage,20,TRUE,5
+SAB-4E160,Sabahar,"Oct 09th,2025",Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+SAB-2B09E,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-E83A3,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-E0D88,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-0CE11,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2300.0,Percentage,20,TRUE,5
+SAB-81816,Sabahar,Saphar Scarp,Textiles,0,0,0.0,3950.0,Percentage,20,TRUE,5
+SAB-B58B8,Sabahar,Saphar Scarp,Textiles,0,0,0.0,3350.0,Percentage,20,TRUE,5
+SAB-B5171,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2950.0,Percentage,20,TRUE,5
+SAB-931B8,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2650.0,Percentage,20,TRUE,5
+SAB-37656,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2650.0,Percentage,20,TRUE,5
+SAB-A436C,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2650.0,Percentage,20,TRUE,5
+SAB-D4D4F,Sabahar,Saphar Scarp,Textiles,0,0,0.0,3050.0,Percentage,20,TRUE,5
+SAB-537E9,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2650.0,Percentage,20,TRUE,5
+SAB-7D536,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2750.0,Percentage,20,TRUE,5
+SAB-B83AD,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-55082,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2800.0,Percentage,20,TRUE,5
+SAB-7C41A,Sabahar,Saphar Scarp,Textiles,0,0,0.0,6350.0,Percentage,20,TRUE,5
+SAB-EAE84,Sabahar,Saphar Scarp,Textiles,0,0,0.0,3900.0,Percentage,20,TRUE,5
+SAB-44851,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-4BDAC,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-40D49,Sabahar,Saphar Scarp,Textiles,0,0,0.0,2850.0,Percentage,20,TRUE,5
+SAB-789D6,Sabahar,Saphar Scarp,Textiles,0,0,0.0,3500.0,Percentage,20,TRUE,5
+SAB-B31CB,Sabahar,Hand Towel,Textiles,12,12,0.0,1100.0,Percentage,20,TRUE,5
+SAB-7AACC,Sabahar,Sabhar Gabi,Textiles,3,3,0.0,5500.0,Percentage,20,TRUE,5
+SAB-A0C10,Sabahar,Bedside Mat,Textiles,2,2,0.0,3150.0,Percentage,20,TRUE,5
+SAB-6D6FF,Sabahar,Bedside Mat(3 green + 1 blue),Textiles,4,4,0.0,0.0,Percentage,20,TRUE,5
+SAB-B5598,Sabahar,Cushion,Textiles,9,9,0.0,1850.0,Percentage,20,TRUE,5
+SAB-D405D,Sabahar,Bath Towel,Textiles,3,3,0.0,0.0,Percentage,20,TRUE,5
+SAB-D2A43,Sabahar,Sabhar Throw,Textiles,0,0,0.0,4000.0,Percentage,20,TRUE,5
+SAB-A2EF7,Sabahar,Sabhar Throw,Textiles,0,0,0.0,4500.0,Percentage,20,TRUE,5
+SAB-0F4BD,Sabahar,Maya Shawl,Textiles,1,1,0.0,4700.0,Percentage,20,TRUE,5
+SAB-5B8FC,Sabahar,Pinwheel Shawl,Textiles,1,1,0.0,4970.0,Percentage,20,TRUE,5
+SAB-220CF,Sabahar,Maraki Shawl 70*200,Textiles,1,1,0.0,3580.0,Percentage,20,TRUE,5
+SAB-4922E,Sabahar,KOKO,Textiles,1,1,0.0,3580.0,Percentage,20,TRUE,5
+SAB-B6529,Sabahar,Wubet Shawl 70*200,Textiles,1,1,0.0,3770.0,Percentage,20,TRUE,5
+SAB-EBEAC,Sabahar,Kokeb Scarf,Textiles,1,1,0.0,3180.0,Percentage,20,TRUE,5
+SAB-417B6,Sabahar,Petra Scarf,Textiles,2,2,0.0,2280.0,Percentage,20,TRUE,5
+SAB-3D09A,Sabahar,Nora Cotton Shawl 70*200,Textiles,1,1,0.0,3280.0,Percentage,20,TRUE,5
+SAB-3F202,Sabahar,Ari Shawl 70*200,Textiles,3,3,0.0,3580.0,Percentage,20,TRUE,5
+SAB-FDB72,Sabahar,Debora Shawl 70 x 200,Textiles,1,1,0.0,4170.0,Percentage,20,TRUE,5
+SAB-B088D,Sabahar,Judith Shawl,Textiles,1,1,0.0,0.0,Percentage,20,TRUE,5
+SAB-C3A3B,Sabahar,Telba Scarf 45*200,Textiles,3,3,0.0,3790.0,Percentage,20,TRUE,5
+SAB-ECBF9,Sabahar,Bere shint scarf,Textiles,1,1,0.0,2700.0,Percentage,20,TRUE,5
+SAB-7060E,Sabahar,Meskerem shawl,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+SAB-4C329,Sabahar,Adina Shawl,Textiles,1,1,0.0,5090.0,Percentage,20,TRUE,5
+SAB-86F85,Sabahar,Linen shawl 70*200/Telba Shawl,Textiles,3,3,0.0,5090.0,Percentage,20,TRUE,5
+SAB-C3489,Sabahar,Nora cotton shawl 70*200,Textiles,2,2,0.0,3280.0,Percentage,20,TRUE,5
+SAB-F05BD,Sabahar,Desta Shawl 70*200,Textiles,1,1,0.0,3580.0,Percentage,20,TRUE,5
+SAB-2E159,Sabahar,Fasil Silk Shawl,Textiles,1,1,0.0,4970.0,Percentage,20,TRUE,5
+SAB-8EE81,Sabahar,Maya Scarf,Textiles,1,1,0.0,3500.0,Percentage,20,TRUE,5
+SAB-05194,Sabahar,Pinwheel shawl,Textiles,3,3,0.0,3280.0,Percentage,20,TRUE,5
+SAB-802F4,Sabahar,Judith Shawl,Textiles,1,1,0.0,3580.0,Percentage,20,TRUE,5
+SAB-D209B,Sabahar,Coasters,Textiles,8,8,0.0,800.0,Percentage,20,TRUE,5
+SAB-1BDBD,Sabahar,Hani Koften,Textiles,3,3,0.0,4050.0,Percentage,20,TRUE,5
+SAB-76131,Sabahar,Debora Shawl 70x200,Textiles,1,1,0.0,4900.0,Percentage,20,TRUE,5
+SAB-C5A4E,Sabahar,Winter Shawl,Textiles,1,1,0.0,4900.0,Percentage,20,TRUE,5
+SAB-7F857,Sabahar,Silk Queen Mennen Grey Scarp,Textiles,1,1,0.0,5750.0,Percentage,20,TRUE,5
+SAB-434DB,Sabahar,Linen Shawl 70*200/ Telba Shawl,Textiles,1,1,0.0,6650.0,Percentage,20,TRUE,5
+SAB-C0524,Sabahar,Desta Throw ( New Mechot),Textiles,1,1,0.0,9850.0,Percentage,20,TRUE,5
+SAB-FEC8C,Sabahar,Michot,Textiles,1,1,0.0,9850.0,Percentage,20,TRUE,5
+PHN-9242A,Phone Cases,Phone Case ( Eshi),Accessories,2,2,500.0,800.0,Percentage,20,TRUE,5
+PHN-F205A,Phone Cases,Phone Case ( Cross ),Accessories,2,2,500.0,800.0,Percentage,20,TRUE,5
+PHN-50549,Phone Cases,Phone Case ( Arabic ),Accessories,3,3,500.0,800.0,Percentage,20,TRUE,5
+PHN-E1A50,Phone Cases,Phone Case ( Axum ),Accessories,1,1,500.0,800.0,Percentage,20,TRUE,5
+LEY-D9A36,Leyu,Abaye,Textiles,4,4,0.0,3000.0,Percentage,20,TRUE,5
+LEY-9587A,Leyu,Flower,Textiles,10,10,0.0,3000.0,Percentage,20,TRUE,5
+LEY-65273,Leyu,Henock,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+LEY-D5EBC,Leyu,Adey Abeba,Textiles,1,1,0.0,3000.0,Percentage,20,TRUE,5
+LEY-F0A44,Leyu,Etalem Balnket,Textiles,2,2,0.0,9500.0,Percentage,20,TRUE,5
+LEY-07139,Leyu,Love & Hope Pillowcase,Textiles,2,2,0.0,2500.0,Percentage,20,TRUE,5
+LEY-9B278,Leyu,Love & Hope Scarfs,Textiles,5,5,0.0,5000.0,Percentage,20,TRUE,5
+LEY-EE5D9,Leyu,Etalem Pillow Case,Textiles,2,2,0.0,5000.0,Percentage,20,TRUE,5
+LEY-09E37,Leyu,Inventory,Textiles,0,0,0.0,0.0,Percentage,20,TRUE,5
+LEY-37CE7,Leyu,Abaye,Textiles,3,3,0.0,3000.0,Percentage,20,TRUE,5
+LEY-6243F,Leyu,Etalem Balnket,Textiles,1,1,0.0,9500.0,Percentage,20,TRUE,5
+LEY-5C78E,Leyu,Love & Hope Pillowcase,Textiles,1,1,0.0,2500.0,Percentage,20,TRUE,5
+LEY-B6A34,Leyu,Love & Hope Scarfs,Textiles,5,5,0.0,5000.0,Percentage,20,TRUE,5
+LEY-50435,Leyu,Etalem Pillow Case,Textiles,2,2,0.0,5000.0,Percentage,20,TRUE,5
+LEY-59C1A,Leyu,Flower,Textiles,6,6,0.0,3000.0,Percentage,20,TRUE,5
+HAN-42340,Hanfala Leather,Womens Wallet,Leather Goods,3,3,1000.0,1400.0,Percentage,20,TRUE,5
+HAN-ED2B9,Hanfala Leather,Belt,Leather Goods,3,3,1000.0,1500.0,Percentage,20,TRUE,5
+HAN-B3FB6,Hanfala Leather,Card Holder,Leather Goods,10,10,280.0,400.0,Percentage,20,TRUE,5
+HAN-581F0,Hanfala Leather,Men Wallet,Leather Goods,2,2,500.0,0.0,Percentage,20,TRUE,5
+HAN-FAE9A,Hanfala Leather,Purse,Leather Goods,2,2,1000.0,1800.0,Percentage,20,TRUE,5
+HAN-28ECF,Hanfala Leather,card Holder fold,Leather Goods,2,2,380.0,400.0,Percentage,20,TRUE,5
+HAN-B7C53,Hanfala Leather,Larger Passoprt Holder(paid),Leather Goods,0,0,0.0,600.0,Percentage,20,TRUE,5
+HAN-1C1D8,Hanfala Leather,Glass Holder ( paid),Leather Goods,0,0,0.0,0.0,Percentage,20,TRUE,5
+HAN-7CA06,Hanfala Leather,Tab Cover,Leather Goods,1,1,2000.0,2500.0,Percentage,20,TRUE,5
+HAN-E4AB2,Hanfala Leather,Laptop Cover,Leather Goods,1,1,3200.0,3800.0,Percentage,20,TRUE,5
+HAN-4C607,Hanfala Leather,Toiletries Holder Small,Leather Goods,1,1,1400.0,1800.0,Percentage,20,TRUE,5
+HAN-F9BBA,Hanfala Leather,Toiletries Holder Large,Leather Goods,1,1,1500.0,2000.0,Percentage,20,TRUE,5
+HAN-95C77,Hanfala Leather,LADIES Tote Bag Green,Leather Goods,1,1,0.0,0.0,Percentage,20,TRUE,5
+HAN-6042B,Hanfala Leather,LADIES Tote Bag,Leather Goods,1,1,0.0,0.0,Percentage,20,TRUE,5
+HAN-20468,Hanfala Leather,Inventory 15/06/2026,Leather Goods,0,0,0.0,0.0,Percentage,20,TRUE,5
+HAN-A5028,Hanfala Leather,Womens Wallet,Leather Goods,0,0,1000.0,1400.0,Percentage,20,TRUE,5
+HAN-D06EB,Hanfala Leather,Belt,Leather Goods,0,0,1000.0,1500.0,Percentage,20,TRUE,5
+HAN-C1470,Hanfala Leather,Card Holder,Leather Goods,0,0,280.0,400.0,Percentage,20,TRUE,5
+HAN-92B3A,Hanfala Leather,Men Wallet,Leather Goods,0,0,500.0,600.0,Percentage,20,TRUE,5
+HAN-BAC3F,Hanfala Leather,Purse,Leather Goods,0,0,1000.0,1800.0,Percentage,20,TRUE,5
+HAN-B86DF,Hanfala Leather,card Holder fold,Leather Goods,0,0,380.0,400.0,Percentage,20,TRUE,5
+HAN-6EE22,Hanfala Leather,Larger Passoprt Holder(paid),Leather Goods,0,0,0.0,600.0,Percentage,20,TRUE,5
+HAN-30934,Hanfala Leather,Glass Holder ( paid),Leather Goods,0,0,0.0,0.0,Percentage,20,TRUE,5
+HAN-76330,Hanfala Leather,Tab Cover,Leather Goods,0,0,2000.0,2500.0,Percentage,20,TRUE,5
+HAN-D8DCA,Hanfala Leather,Laptop Cover,Leather Goods,0,0,3200.0,3800.0,Percentage,20,TRUE,5
+HAN-45AEC,Hanfala Leather,Toiletries Holder Small,Leather Goods,0,0,1400.0,1800.0,Percentage,20,TRUE,5
+HAN-74594,Hanfala Leather,Toiletries Holder Large,Leather Goods,0,0,1500.0,2000.0,Percentage,20,TRUE,5
+HAN-50993,Hanfala Leather,LADIES Tote Bag Green,Leather Goods,0,0,0.0,5000.0,Percentage,20,TRUE,5
+HAN-0A002,Hanfala Leather,LADIES Tote Bag,Leather Goods,0,0,0.0,5500.0,Percentage,20,TRUE,5
+HAN-7FB12,Hanfala Leather,New Arrivals 25/06/2026,Leather Goods,0,0,0.0,0.0,Percentage,20,TRUE,5
+HAN-DE7AD,Hanfala Leather,Womens Wallet,Leather Goods,0,0,1000.0,1500.0,Percentage,20,TRUE,5
+HAN-7CA41,Hanfala Leather,Belt Double Side,Leather Goods,0,0,2000.0,1500.0,Percentage,20,TRUE,5
+HAN-C7B83,Hanfala Leather,Belt One Side,Leather Goods,0,0,1500.0,400.0,Percentage,20,TRUE,5
+HAN-4E39E,Hanfala Leather,Card Holder,Leather Goods,0,0,300.0,400.0,Percentage,20,TRUE,5
+HAN-F561C,Hanfala Leather,Card Holder Fold,Leather Goods,0,0,330.0,500.0,Percentage,20,TRUE,5
+HAN-50AD2,Hanfala Leather,Passport Holder,Leather Goods,0,0,700.0,800.0,Percentage,20,TRUE,5
+HAN-3BA70,Hanfala Leather,Phone Case Bag,Leather Goods,0,0,2000.0,2800.0,Percentage,20,TRUE,5
+ELE-3D64A,Elegance & Mela Studio,Brown ladies bag,Bags & Leather,1,1,0.0,3200.0,Percentage,20,TRUE,5
+ELE-727ED,Elegance & Mela Studio,Pattern ladies bag,Bags & Leather,1,1,0.0,3500.0,Percentage,20,TRUE,5
+ELE-D1A66,Elegance & Mela Studio,Tote bag,Bags & Leather,1,1,0.0,1500.0,Percentage,20,TRUE,5
+ELE-8B816,Elegance & Mela Studio,17 inch laptop bag,Bags & Leather,1,1,0.0,3500.0,Percentage,20,TRUE,5
+ELE-BC467,Elegance & Mela Studio,14 inch laptop bag,Bags & Leather,1,1,0.0,3200.0,Percentage,20,TRUE,5
+ELE-E1A94,Elegance & Mela Studio,Lamp Nikisat,Bags & Leather,1,1,0.0,8500.0,Percentage,20,TRUE,5
+ELE-2C024,Elegance & Mela Studio,Lamp,Bags & Leather,2,2,0.0,4500.0,Percentage,20,TRUE,5
