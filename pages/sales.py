@@ -6,23 +6,29 @@ st.set_page_config(page_title="Record Sale", page_icon="🛒", layout="wide")
 
 st.markdown("""
 <style>
+    /* Forest Green Card Backgrounds with Sage Green Accent Borders */
     div[data-testid="stMetric"] {
-        background-color: #1E293B;
+        background-color: #2E6F40;
         padding: 18px;
         border-radius: 12px;
-        border: 1px solid #334155;
+        border: 2px solid #87AE73;
     }
+    
+    /* Sage Green Interactive Buttons */
     .stButton > button {
         width: 100%;
         border-radius: 8px;
-        font-weight: 600;
-        background-color: #6C5CE7;
-        color: white;
+        font-weight: 700;
+        background-color: #87AE73;
+        color: #0D1B12;
         border: none;
-        padding: 0.6rem 1rem;
+        padding: 0.61rem 1rem;
+        transition: all 0.2s ease-in-out;
     }
     .stButton > button:hover {
-        background-color: #5A4AD1;
+        background-color: #2E6F40;
+        color: #FFFFFF;
+        border: 1px solid #87AE73;
     }
 </style>
 """, unsafe_allow_html=True)
