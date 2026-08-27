@@ -15,6 +15,66 @@ def get_products() -> pd.DataFrame:
         return df[df["Active"].astype(str).str.upper() == "TRUE"]
     return df
 
+def adjust_stock(
+    product_id: str,
+    quantity_change: int,
+    transaction_type: str = "Restock",
+    receptionist: str = "-",
+    reason: str = "-"
+) -> bool:
+    """
+    Updates stock levels in Products sheet, logs to Inventory_Transactions,
+    and clears cache to reflect changes immediately.
+    """
+    now = datetime.now(TIMEZONE)
+    date_only = now.strftime("%Y-%m-%d")
+    timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    txn_id = now.strftime("TXN-%Y%m%d%H%M%S")
+
+    # Fetch fresh Products sheet
+    products_df = fetch_worksheet_data("Products")
+    if products_df.empty or "Product_ID" not in products_df.columns:
+        st.error("Products sheet is empty or missing Product_ID column.")
+        return False
+
+    # Match exact Product ID
+    match_idx = products_df.index[products_df["Product_ID"].astype(str).str.strip() == str(product_id).strip()].tolist()
+    if not match_idx:
+        st.error(f"Product ID '{product_id}' not found in Google Sheet.")
+        return False
+
+    row_i = match_idx[0]
+    company = str(products_df.loc[row_i, "Company"]) if "Company" in products_df.columns else "-"
+    product_name = str(products_df.loc[row_i, "Product_Name"]) if "Product_Name" in products_df.columns else "-"
+
+    # Determine sign for quantity change
+    qty_change = int(quantity_change)
+    if transaction_type in ["Damage", "Waste", "Personal Use", "Deduction", "Sale"] and qty_change > 0:
+        qty_change = -qty_change
+
+    current_val = pd.to_numeric(products_df.loc[row_i, "Current_Stock"], errors="coerce")
+    current_val = 0 if pd.isna(current_val) else int(current_val)
+    new_stock = max(0, current_val + qty_change)
+
+    # 1. Save updated stock back to Products tab
+    products_df.loc[row_i, "Current_Stock"] = new_stock
+    prod_success = update_data("Products", products_df)
+
+    # 2. Append transaction record to Inventory_Transactions tab
+    inv_row = [
+        txn_id, date_only, product_id, company, product_name,
+        transaction_type, qty_change, reason if reason else "-",
+        receptionist if receptionist else "-", timestamp_str
+    ]
+    try:
+        write_row("Inventory_Transactions", inv_row)
+    except Exception as e:
+        st.warning(f"Stock updated, but transaction logging failed: {e}")
+
+    # 3. Clear cache so dashboard and inventory sync immediately
+    st.cache_data.clear()
+    return prod_success
+
 def record_sale(
     product_id: str = "-",
     company: str = "-",
@@ -28,16 +88,11 @@ def record_sale(
     *args,
     **kwargs
 ) -> bool:
-    """
-    1. Appends sale to Sales sheet.
-    2. Logs change to Inventory_Transactions sheet.
-    3. Updates Current_Stock in Products sheet.
-    """
+    """Appends sale record and reduces stock count."""
     now = datetime.now(TIMEZONE)
     date_only = now.strftime("%Y-%m-%d")         
     timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
     sale_id = now.strftime("S-%Y%m%d%H%M%S")     
-    txn_id = now.strftime("TXN-%Y%m%d%H%M%S")
     
     calc_total = float(total_amount) if total_amount > 0 else float(quantity) * float(unit_price)
 
@@ -48,7 +103,6 @@ def record_sale(
     buyer = buyer_name if buyer_name else "-"
     note = notes if notes else "-"
 
-    # 1. Save to Sales sheet
     sales_row = [
         sale_id, date_only, p_id, comp, prod,
         int(quantity), float(unit_price), calc_total,
@@ -56,31 +110,13 @@ def record_sale(
     ]
     sales_success = write_row("Sales", sales_row)
 
-    # 2. Save to Inventory_Transactions sheet
-    inv_row = [
-        txn_id, date_only, p_id, comp, prod,
-        "Sale", -int(quantity), f"Sale ({sale_id})",
-        "-", timestamp_str
-    ]
-    try:
-        write_row("Inventory_Transactions", inv_row)
-    except Exception as e:
-        st.warning(f"Sale recorded, but inventory transaction log failed: {e}")
-
-    # 3. Deduct stock from Products sheet
-    try:
-        products_df = fetch_worksheet_data("Products")
-        if not products_df.empty and "Product_ID" in products_df.columns and "Current_Stock" in products_df.columns:
-            match_idx = products_df.index[products_df["Product_ID"] == p_id].tolist()
-            if match_idx:
-                row_i = match_idx[0]
-                current_val = pd.to_numeric(products_df.loc[row_i, "Current_Stock"], errors="coerce")
-                current_val = 0 if pd.isna(current_val) else int(current_val)
-                
-                products_df.loc[row_i, "Current_Stock"] = max(0, current_val - int(quantity))
-                update_data("Products", products_df)
-    except Exception as e:
-        st.warning(f"Sale recorded, but stock level update in Products sheet failed: {e}")
+    adjust_stock(
+        product_id=p_id,
+        quantity_change=-int(quantity),
+        transaction_type="Sale",
+        receptionist="-",
+        reason=f"Sale ({sale_id})"
+    )
 
     return sales_success
 
