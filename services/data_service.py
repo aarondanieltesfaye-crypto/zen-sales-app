@@ -27,7 +27,7 @@ def record_sale(
     **kwargs
 ) -> bool:
     """
-    Appends a new sale record to Sales sheet AND logs an inventory transaction.
+    Appends a sale record to Sales (Columns A-M) and logs to Inventory_Transactions (Columns A-J).
     """
     now = datetime.now(TIMEZONE)
     date_only = now.strftime("%Y-%m-%d")         
@@ -44,43 +44,26 @@ def record_sale(
     buyer = buyer_name if buyer_name else "-"
     note = notes if notes else "-"
 
-    # 1. Row for Sales Sheet (Columns A - M)
+    # Sales tab row (Columns A through M)
     sales_row = [
-        sale_id,             # Column A: Sale_ID
-        date_only,           # Column B: Date
-        p_id,                # Column C: Product_ID
-        comp,                # Column D: Company
-        prod,                # Column E: Product_Name
-        int(quantity),       # Column F: Quantity
-        float(unit_price),   # Column G: Unit_Selling_Price
-        calc_total,          # Column H: Total_Sale
-        "-",                 # Column I: Zen_Revenue 
-        pay,                 # Column J: Payment_Method 
-        buyer,               # Column K: Buyer
-        "-",                 # Column L: Receptionist
-        note                 # Column M: Notes
+        sale_id, date_only, p_id, comp, prod,
+        int(quantity), float(unit_price), calc_total,
+        "-", pay, buyer, "-", note
     ]
     
     sales_success = write_row("Sales", sales_row)
 
-    # 2. Row for Inventory_Transactions Sheet (Columns A - J)
+    # Inventory_Transactions tab row (Columns A through J)
     inv_row = [
-        txn_id,              # Column A: Transaction_ID
-        date_only,           # Column B: Date
-        p_id,                # Column C: Product_ID
-        comp,                # Column D: Company
-        prod,                # Column E: Product_Name
-        "Sale",              # Column F: Transaction_Type
-        -int(quantity),      # Column G: Quantity_Change (negative reduction)
-        f"Sale ({sale_id})", # Column H: Reason
-        "-",                 # Column I: Receptionist
-        timestamp_str        # Column J: Timestamp
+        txn_id, date_only, p_id, comp, prod,
+        "Sale", -int(quantity), f"Sale ({sale_id})",
+        "-", timestamp_str
     ]
     
     try:
         write_row("Inventory_Transactions", inv_row)
     except Exception as e:
-        st.warning(f"Sale recorded, but inventory transaction log failed: {e}")
+        st.warning(f"Sale logged, but inventory transaction table update failed: {e}")
 
     return sales_success
 
