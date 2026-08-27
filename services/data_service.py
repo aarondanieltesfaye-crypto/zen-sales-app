@@ -27,15 +27,16 @@ def record_sale(
     **kwargs
 ) -> bool:
     """
-    Appends a new sale record aligned precisely with columns A through M.
+    Appends a new sale record to Sales sheet AND logs an inventory transaction.
     """
     now = datetime.now(TIMEZONE)
     date_only = now.strftime("%Y-%m-%d")         
+    timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
     sale_id = now.strftime("S-%Y%m%d%H%M%S")     
+    txn_id = now.strftime("TXN-%Y%m%d%H%M%S")
     
     calc_total = float(total_amount) if total_amount > 0 else float(quantity) * float(unit_price)
 
-    # Clean optional fields
     p_id = product_id if product_id else "-"
     comp = company if company else "-"
     prod = product_name if product_name else "-"
@@ -43,8 +44,8 @@ def record_sale(
     buyer = buyer_name if buyer_name else "-"
     note = notes if notes else "-"
 
-    # Exactly 13 items mapping to Columns A through M
-    row_data = [
+    # 1. Row for Sales Sheet (Columns A - M)
+    sales_row = [
         sale_id,             # Column A: Sale_ID
         date_only,           # Column B: Date
         p_id,                # Column C: Product_ID
@@ -60,7 +61,28 @@ def record_sale(
         note                 # Column M: Notes
     ]
     
-    return write_row("Sales", row_data)
+    sales_success = write_row("Sales", sales_row)
+
+    # 2. Row for Inventory_Transactions Sheet (Columns A - J)
+    inv_row = [
+        txn_id,              # Column A: Transaction_ID
+        date_only,           # Column B: Date
+        p_id,                # Column C: Product_ID
+        comp,                # Column D: Company
+        prod,                # Column E: Product_Name
+        "Sale",              # Column F: Transaction_Type
+        -int(quantity),      # Column G: Quantity_Change (negative reduction)
+        f"Sale ({sale_id})", # Column H: Reason
+        "-",                 # Column I: Receptionist
+        timestamp_str        # Column J: Timestamp
+    ]
+    
+    try:
+        write_row("Inventory_Transactions", inv_row)
+    except Exception as e:
+        st.warning(f"Sale recorded, but inventory transaction log failed: {e}")
+
+    return sales_success
 
 def get_sales() -> pd.DataFrame:
     """Fetches all recorded sales from the Google Sheet."""
