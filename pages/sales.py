@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from services.data_service import get_products, record_sale
 
 st.title("🛒 Record a Sale")
