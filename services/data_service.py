@@ -35,15 +35,29 @@ def get_settings() -> dict:
     return defaults
 
 def save_settings(currency: str, low_stock_threshold: int) -> bool:
-    """Overwrites key-value settings in Google Sheet and clears Streamlit cache."""
+    """
+    Overwrites key-value settings in Settings tab and updates 
+    Low_Stock_Threshold column for all products in Products tab.
+    """
+    # 1. Update Settings tab
     settings_df = pd.DataFrame([
         ["Default_Low_Stock_Threshold", str(low_stock_threshold)],
         ["Currency", str(currency)]
     ], columns=["Key", "Value"])
     
-    success = update_data("Settings", settings_df)
+    s_success = update_data("Settings", settings_df)
+
+    # 2. Bulk update Low_Stock_Threshold in Products tab
+    try:
+        products_df = fetch_worksheet_data("Products")
+        if not products_df.empty and "Low_Stock_Threshold" in products_df.columns:
+            products_df["Low_Stock_Threshold"] = str(low_stock_threshold)
+            update_data("Products", products_df)
+    except Exception as e:
+        st.warning(f"Settings saved, but updating Products sheet failed: {e}")
+
     st.cache_data.clear()
-    return success
+    return s_success
 
 def adjust_stock(
     product_id: str,
