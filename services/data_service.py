@@ -7,10 +7,6 @@ from services.google_sheets import fetch_worksheet_data, write_row, update_data
 # Local timezone setting (East Africa Time UTC+3)
 TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
 
-def get_current_timestamp() -> str:
-    """Returns the current timestamp formatted in local East Africa Time."""
-    return datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
-
 def get_products() -> pd.DataFrame:
     """Fetches products from the Google Sheet."""
     df = fetch_worksheet_data("Products")
@@ -19,37 +15,42 @@ def get_products() -> pd.DataFrame:
     return df
 
 def record_sale(
-    product_name: str = "",
+    product_name: str = "-",
     quantity: int = 1,
     unit_price: float = 0.0,
     total_amount: float = 0.0,
-    company: str = "",
-    buyer_name: str = "",
-    notes: str = "",
+    company: str = "-",
+    buyer_name: str = "-",
+    notes: str = "-",
     *args,
     **kwargs
 ) -> bool:
     """
-    Appends a new sale record exactly aligned with the Google Sheets columns.
+    Appends a new sale record. Formats the date for the Reports page 
+    and uses hyphens to prevent Google Sheets from dropping empty columns.
     """
-    timestamp = get_current_timestamp()
-    # Generates a unique ID like S-20260827103137
-    sale_id = datetime.now(TIMEZONE).strftime("S-%Y%m%d%H%M%S") 
+    now = datetime.now(TIMEZONE)
+    date_only = now.strftime("%Y-%m-%d")         # Stripped time so Reports match "Today"
+    sale_id = now.strftime("S-%Y%m%d%H%M%S")     # Generates unique ID
     
-    # This list now perfectly matches columns A through L in your sheet
+    # Replace any accidentally passed empty strings with hyphens
+    company_val = company if company else "-"
+    buyer_val = buyer_name if buyer_name else "-"
+    notes_val = notes if notes else "-"
+
     row_data = [
         sale_id,             # Column A: Sale_ID
-        timestamp,           # Column B: Date
-        "",                  # Column C: Product_ID (Leaving blank if not provided)
-        company,             # Column D: Company
+        date_only,           # Column B: Date (Strictly YYYY-MM-DD)
+        "-",                 # Column C: Product_ID
+        company_val,         # Column D: Company
         product_name,        # Column E: Product_Name
         quantity,            # Column F: Quantity
         unit_price,          # Column G: Unit_Selling_Price
         total_amount,        # Column H: Total_Sale
-        "",                  # Column I: Zen_Revenue (Leave blank for sheet formulas)
-        "",                  # Column J: Payment_Method 
-        buyer_name,          # Column K: Buyer
-        notes                # Column L: Notes/Receipt
+        "-",                 # Column I: Zen_Revenue 
+        "-",                 # Column J: Payment_Method 
+        buyer_val,           # Column K: Buyer
+        notes_val            # Column L: Notes
     ]
     
     return write_row("Sales", row_data)
