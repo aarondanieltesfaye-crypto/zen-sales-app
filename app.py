@@ -17,6 +17,8 @@ with st.sidebar:
         "Record Sale": "pages/sales.py",
         "Inventory": "pages/inventory.py",
         "Products": "pages/products.py",
+        "Profit & Revenue": "pages/profit.py",
+        "Reports": "pages/reports.py",
         "Settings": "pages/settings.py"
     }
 
