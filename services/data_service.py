@@ -6,6 +6,10 @@ import streamlit as st
 from datetime import datetime
 import json
 import re
+import os
+
+# Hardcoded fallback spreadsheet ID (in case secrets don't load)
+FALLBACK_SPREADSHEET_ID = "1Auhm-mnKHgr2YkvUfM0MebHgJ1GROrhXt1rVn3NjJs0"
 
 def get_gs_client():
     """Get Google Sheets client using credentials from secrets.toml"""
@@ -46,16 +50,18 @@ def get_gs_client():
         return None
 
 def get_spreadsheet_id():
-    """Get spreadsheet ID from secrets"""
+    """Get spreadsheet ID from secrets or use fallback"""
     try:
+        # First try to get from secrets
         if "app" in st.secrets and "spreadsheet_id" in st.secrets["app"]:
             return st.secrets["app"]["spreadsheet_id"]
         else:
-            st.error("'spreadsheet_id' not found in secrets.toml under [app] section.")
-            return None
+            # Use fallback
+            st.warning(f"Using fallback spreadsheet ID: {FALLBACK_SPREADSHEET_ID}")
+            return FALLBACK_SPREADSHEET_ID
     except Exception as e:
-        st.error(f"Error reading spreadsheet ID: {e}")
-        return None
+        st.warning(f"Error reading spreadsheet ID from secrets, using fallback: {e}")
+        return FALLBACK_SPREADSHEET_ID
 
 def get_sales():
     """Fetch sales data from Google Sheets"""
@@ -148,18 +154,38 @@ def get_products():
                     
                     # Extract products
                     for row in data:
-                        if row.get(qty_col, 0) > 0:
+                        # Check if quantity exists and is greater than 0
+                        qty_val = row.get(qty_col, 0)
+                        try:
+                            qty_val = float(qty_val) if qty_val else 0
+                        except:
+                            qty_val = 0
+                            
+                        if qty_val > 0:
                             # Get product name, clean it up
                             product_name = str(row.get(desc_col, "")).strip()
-                            if product_name and product_name not in ["", "None", "nan"]:
+                            if product_name and product_name not in ["", "None", "nan", "NaN"]:
+                                # Get price values
+                                price_val = row.get(price_col, 0)
+                                try:
+                                    price_val = float(price_val) if price_val else 0
+                                except:
+                                    price_val = 0
+                                    
+                                buying_val = row.get(buying_col, 0)
+                                try:
+                                    buying_val = float(buying_val) if buying_val else 0
+                                except:
+                                    buying_val = 0
+                                
                                 product = {
                                     "Company": sheet_name,
                                     "Product_ID": str(row.get(id_col, "")).strip(),
                                     "Product_Name": product_name,
-                                    "Quantity": float(row.get(qty_col, 0)) if row.get(qty_col, 0) else 0,
-                                    "Unit_Selling_Price": float(row.get(price_col, 0)) if row.get(price_col, 0) else 0,
-                                    "Buying_Price": float(row.get(buying_col, 0)) if row.get(buying_col, 0) else 0,
-                                    "Zen_Price": float(row.get(price_col, 0)) if row.get(price_col, 0) else 0
+                                    "Quantity": qty_val,
+                                    "Unit_Selling_Price": price_val,
+                                    "Buying_Price": buying_val,
+                                    "Zen_Price": price_val
                                 }
                                 all_products.append(product)
             except Exception as e:
@@ -172,6 +198,7 @@ def get_products():
         if not df.empty:
             df = df[df["Product_Name"].notna() & (df["Product_Name"] != "")]
             df = df[df["Product_Name"].str.strip() != ""]
+            df = df.reset_index(drop=True)
         
         return df
     except Exception as e:
