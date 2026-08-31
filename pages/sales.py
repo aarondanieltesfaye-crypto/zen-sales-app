@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from services.data_service import get_products, record_sale
+from services.data_service import get_products, record_sale, compute_line_cost_and_profit
 from datetime import datetime
 
 st.set_page_config(page_title="Record Sale", page_icon="🛒", layout="wide")
@@ -60,11 +60,11 @@ else:
                 selected_product_name = st.selectbox("Product", product_names)
                 
                 product_row = filtered_products[filtered_products["Product_Name"] == selected_product_name].iloc[0]
-                product_id = str(product_row.get("Product_ID", product_row.get("ID", "-")))
+                product_id = str(product_row.get("Product_ID", "-"))
                 
-                # Get Zen Revenue (Selling Price)
+                # Selling price (what the customer pays per unit)
                 unit_price = 0.0
-                for col in ["Price", "Unit_Price", "Selling_Price", "Unit_Selling_Price", "Zen_Price"]:
+                for col in ["Selling_Price", "Price", "Unit_Price", "Unit_Selling_Price", "Zen_Price"]:
                     if col in product_row and pd.notna(product_row[col]):
                         try:
                             unit_price = float(product_row[col])
@@ -72,9 +72,12 @@ else:
                         except ValueError:
                             continue
                 
-                # Get Cost/Buying Price for profit calculation
+                # Cost price (only set when Zen owns the stock, e.g. Phone Cases,
+                # Hanfala Leather). Consignment items (Sabahar, Leyu, Elegance &
+                # Mela Studio) have Cost_Price = 0 and earn a commission instead -
+                # that's handled below via compute_line_cost_and_profit.
                 buying_price = 0.0
-                for col in ["Buying_Price", "Unit_Price_Tilla", "Cost", "Abel_price"]:
+                for col in ["Cost_Price", "Buying_Price", "Cost"]:
                     if col in product_row and pd.notna(product_row[col]):
                         try:
                             buying_price = float(product_row[col])
@@ -101,20 +104,17 @@ else:
             receptionist = st.text_input("Receptionist Name", placeholder="Enter your name")
             notes = st.text_input("Notes (Optional)")
 
-    # Calculate totals
+    # Calculate totals (commission-aware: uses real cost when Zen owns the
+    # stock, or the product's commission % when it's a consignment item)
     zen_revenue = quantity * unit_price
-    cost_of_goods = quantity * buying_price
-    profit = zen_revenue - cost_of_goods
-    
+    cost_of_goods, profit = compute_line_cost_and_profit(product_id, quantity, zen_revenue)
+    margin_pct = (profit / zen_revenue * 100.0) if zen_revenue > 0 else 0.0
+
     # Display metrics
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Zen Revenue", f"{zen_revenue:,.2f} ETB", delta=f"Unit Price: {unit_price:,.2f} ETB")
-    if buying_price > 0:
-        col_b.metric("Cost of Goods", f"{cost_of_goods:,.2f} ETB", delta=f"Unit Cost: {buying_price:,.2f} ETB")
-        col_c.metric("💰 Profit", f"{profit:,.2f} ETB", delta=f"Margin: {(profit/zen_revenue*100):.1f}%" if zen_revenue > 0 else "0%")
-    else:
-        col_b.metric("Cost of Goods", "N/A (Cost data not available)")
-        col_c.metric("💰 Profit", "N/A (Cost data not available)")
+    col_b.metric("Cost of Goods / Payout", f"{cost_of_goods:,.2f} ETB")
+    col_c.metric("💰 Profit", f"{profit:,.2f} ETB", delta=f"Margin: {margin_pct:.1f}%" if zen_revenue > 0 else "0%")
 
     if st.button("Complete Sale", type="primary"):
         if not receptionist:
