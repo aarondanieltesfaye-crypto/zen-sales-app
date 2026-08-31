@@ -74,6 +74,63 @@ def write_row(worksheet_name: str, row_data: list) -> bool:
         st.error(f"Error appending row to '{worksheet_name}': {e}")
         return False
 
+def _get_or_create_worksheet(worksheet_name: str, headers: list = None):
+    """Returns the worksheet, creating it (with a header row) if it doesn't exist yet."""
+    sh = client.open(SPREADSHEET_NAME)
+    try:
+        return sh.worksheet(worksheet_name)
+    except gspread.exceptions.WorksheetNotFound:
+        cols = max(10, len(headers or []))
+        ws = sh.add_worksheet(title=worksheet_name, rows=1000, cols=cols)
+        if headers:
+            ws.append_row(headers)
+        return ws
+
+def ensure_headers(worksheet_name: str, required_headers: list) -> bool:
+    """
+    Ensures the worksheet exists and its header row (row 1) contains every
+    column in required_headers, appending any that are missing. This is what
+    keeps a tab like 'Inventory_Transactions' self-healing/connected even if
+    it was created empty or with a different column set.
+    """
+    try:
+        if not client:
+            return False
+        ws = _get_or_create_worksheet(worksheet_name, headers=required_headers)
+        existing = ws.row_values(1)
+        if not existing:
+            ws.append_row(required_headers)
+            return True
+        missing = [h for h in required_headers if h not in existing]
+        if missing:
+            ws.update("A1", [existing + missing])
+        return True
+    except Exception as e:
+        st.error(f"Error ensuring headers for '{worksheet_name}': {e}")
+        return False
+
+def write_row_by_headers(worksheet_name: str, row_dict: dict, required_headers: list = None) -> bool:
+    """
+    Appends a row built from a dict, aligned to the worksheet's ACTUAL header
+    order (read live from row 1) rather than assuming a fixed column position.
+    Any column in required_headers/row_dict that the sheet doesn't have yet is
+    added automatically. This is what keeps writers (Sales, Inventory_Transactions)
+    reliably 'connected' regardless of how the sheet's columns are ordered.
+    """
+    try:
+        if not client:
+            return False
+        headers_needed = required_headers or list(row_dict.keys())
+        ensure_headers(worksheet_name, headers_needed)
+        ws = _get_or_create_worksheet(worksheet_name, headers=headers_needed)
+        headers = ws.row_values(1)
+        row = [str(row_dict.get(h, "")) for h in headers]
+        ws.append_row(row)
+        return True
+    except Exception as e:
+        st.error(f"Error appending row to '{worksheet_name}': {e}")
+        return False
+
 def update_data(worksheet_name: str, df: pd.DataFrame) -> bool:
     """Clears and rewrites a worksheet with the updated DataFrame."""
     try:
