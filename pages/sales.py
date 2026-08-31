@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from services.data_service import get_products, record_sale, compute_line_cost_and_profit
+from utils.pricing import get_buying_price, get_selling_price
 from datetime import datetime
 
 st.set_page_config(page_title="Record Sale", page_icon="🛒", layout="wide")
@@ -61,29 +62,8 @@ else:
                 
                 product_row = filtered_products[filtered_products["Product_Name"] == selected_product_name].iloc[0]
                 product_id = str(product_row.get("Product_ID", "-"))
-                
-                # Selling price (what the customer pays per unit)
-                unit_price = 0.0
-                for col in ["Selling_Price", "Price", "Unit_Price", "Unit_Selling_Price", "Zen_Price"]:
-                    if col in product_row and pd.notna(product_row[col]):
-                        try:
-                            unit_price = float(product_row[col])
-                            break
-                        except ValueError:
-                            continue
-                
-                # Cost price (only set when Zen owns the stock, e.g. Phone Cases,
-                # Hanfala Leather). Consignment items (Sabahar, Leyu, Elegance &
-                # Mela Studio) have Cost_Price = 0 and earn a commission instead -
-                # that's handled below via compute_line_cost_and_profit.
-                buying_price = 0.0
-                for col in ["Cost_Price", "Buying_Price", "Cost"]:
-                    if col in product_row and pd.notna(product_row[col]):
-                        try:
-                            buying_price = float(product_row[col])
-                            break
-                        except ValueError:
-                            continue
+                unit_price = get_selling_price(product_row)
+                buying_price = get_buying_price(product_row)
             else:
                 st.error("No products found for this company.")
                 selected_product_name = "-"
@@ -104,8 +84,7 @@ else:
             receptionist = st.text_input("Receptionist Name", placeholder="Enter your name")
             notes = st.text_input("Notes (Optional)")
 
-    # Calculate totals (commission-aware: uses real cost when Zen owns the
-    # stock, or the product's commission % when it's a consignment item)
+    # Calculate totals from the Products sheet prices
     zen_revenue = quantity * unit_price
     cost_of_goods, profit = compute_line_cost_and_profit(product_id, quantity, zen_revenue)
     margin_pct = (profit / zen_revenue * 100.0) if zen_revenue > 0 else 0.0
@@ -113,7 +92,7 @@ else:
     # Display metrics
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Zen Revenue", f"{zen_revenue:,.2f} ETB", delta=f"Unit Price: {unit_price:,.2f} ETB")
-    col_b.metric("Cost of Goods / Payout", f"{cost_of_goods:,.2f} ETB")
+    col_b.metric("Cost of Goods / Payout", f"{cost_of_goods:,.2f} ETB", delta=f"Buying price: {buying_price:,.2f} ETB")
     col_c.metric("💰 Profit", f"{profit:,.2f} ETB", delta=f"Margin: {margin_pct:.1f}%" if zen_revenue > 0 else "0%")
 
     if st.button("Complete Sale", type="primary"):
@@ -125,11 +104,11 @@ else:
                 company=selected_company,
                 product_name=selected_product_name,
                 quantity=quantity,
-                unit_price=unit_price,  # Zen Revenue per unit
-                buying_price=buying_price,  # Cost per unit
-                zen_revenue=zen_revenue,  # Total Zen Revenue
-                total_amount=zen_revenue,  # Total amount (same as Zen Revenue)
-                cost_of_goods=cost_of_goods,  # Total cost
+                unit_price=unit_price,
+                buying_price=buying_price,
+                zen_revenue=zen_revenue,
+                total_amount=zen_revenue,
+                cost_of_goods=cost_of_goods,
                 payment_method=payment_method,
                 buyer_name=buyer_name,
                 receptionist=receptionist,
