@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import streamlit as st
 from services.google_sheets import fetch_worksheet_data, write_row_by_headers, update_data
+from utils.calculations import calculate_zen_revenue
 
 TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
 
@@ -89,7 +90,11 @@ def adjust_stock(
 
     products_df = fetch_worksheet_data("Products")
     if products_df.empty or "Product_ID" not in products_df.columns:
-        st.error("Products sheet is empty or missing Product_ID column.")
+        found_cols = ", ".join(products_df.columns.tolist()) if not products_df.empty else "(sheet is empty)"
+        st.error(
+            f"Products sheet is missing a 'Product_ID' column. Columns found: {found_cols}. "
+            "Make sure cell A1 of the Products tab says exactly 'Product_ID'."
+        )
         return False
 
     match_idx = products_df.index[products_df["Product_ID"].astype(str).str.strip() == str(product_id).strip()].tolist()
@@ -161,8 +166,18 @@ def record_sale(
     sale_id = now.strftime("S-%Y%m%d%H%M%S")
 
     calc_total = float(total_amount) if total_amount > 0 else float(quantity) * float(unit_price)
-    calc_cogs = float(cost_of_goods) if cost_of_goods > 0 else float(quantity) * float(buying_price)
-    profit = calc_total - calc_cogs
+
+    # Prefer the true cost/commission-based calculation from the Products
+    # sheet; fall back to whatever the caller passed in if the product can't
+    # be found there.
+    calc_cogs, profit = compute_line_cost_and_profit(product_id, quantity, calc_total)
+    if calc_cogs == 0.0 and profit == calc_total and cost_of_goods > 0:
+        calc_cogs = float(cost_of_goods)
+        profit = calc_total - calc_cogs
+    elif calc_cogs == 0.0 and profit == calc_total and buying_price > 0:
+        calc_cogs = float(quantity) * float(buying_price)
+        profit = calc_total - calc_cogs
+
     profit_margin = (profit / calc_total * 100.0) if calc_total > 0 else 0.0
 
     sales_row = {
@@ -200,12 +215,66 @@ def get_sales() -> pd.DataFrame:
     """Fetches all recorded sales from the Google Sheet."""
     return fetch_worksheet_data("Sales")
 
+def get_product_cost_lookup() -> dict:
+    """
+    Returns {Product_ID: {cost_price, commission_type, commission_value, selling_price}}
+    from the Products sheet. This is the single source of truth for how much of
+    a sale is Zen's profit:
+      - If the product has a real Cost_Price (Zen owns the stock, e.g. Phone Cases,
+        Hanfala Leather), profit = Selling_Price - Cost_Price.
+      - If Cost_Price is 0 (consignment items, e.g. Sabahar, Leyu, Elegance & Mela
+        Studio), Zen doesn't buy the stock - it earns a commission instead, so
+        profit = the item's Commission_Type/Commission_Value applied to the sale.
+    """
+    products_df = fetch_worksheet_data("Products")
+    lookup = {}
+    if products_df.empty or "Product_ID" not in products_df.columns:
+        return lookup
+    for _, p in products_df.iterrows():
+        pid = str(p.get("Product_ID", "")).strip()
+        if not pid:
+            continue
+        lookup[pid] = {
+            "cost_price": pd.to_numeric(p.get("Cost_Price", 0), errors="coerce") or 0.0,
+            "selling_price": pd.to_numeric(p.get("Selling_Price", 0), errors="coerce") or 0.0,
+            "commission_type": p.get("Commission_Type", "Percentage") or "Percentage",
+            "commission_value": pd.to_numeric(p.get("Commission_Value", 0), errors="coerce") or 0.0,
+        }
+    return lookup
+
+def compute_line_cost_and_profit(product_id: str, quantity: float, total_sale: float, cost_lookup: dict = None):
+    """
+    Computes (cost_of_goods, profit) for a single sale line, using real cost
+    price when Zen owns the stock, or commission when it's a consignment item.
+    Falls back to treating the whole sale as profit if the product can't be
+    found (better to overstate profit visibly than silently hide the sale).
+    """
+    if cost_lookup is None:
+        cost_lookup = get_product_cost_lookup()
+
+    info = cost_lookup.get(str(product_id).strip())
+    if not info:
+        return 0.0, float(total_sale)
+
+    if info["cost_price"] > 0:
+        cogs = info["cost_price"] * float(quantity)
+        return cogs, float(total_sale) - cogs
+
+    profit = calculate_zen_revenue(
+        gross_sale=float(total_sale),
+        quantity=float(quantity),
+        commission_type=info["commission_type"],
+        commission_value=info["commission_value"],
+    )
+    return float(total_sale) - profit, profit
+
 def get_profit_summary() -> dict:
     """
     Computes revenue, cost of goods, profit and margin across all sales.
-    Prefers the Profit/Cost_of_Goods columns recorded at sale time; for
-    older rows recorded before that fix, falls back to joining against the
-    Products sheet's Cost_Price so historical data still shows correctly.
+    Profit is always recomputed fresh from the Products sheet (Cost_Price for
+    owned inventory, commission for consignment items) rather than trusting
+    whatever was written at sale time - this way a fix to the Products sheet
+    (e.g. correcting a cost price) is reflected for historical sales too.
     Returns a dict with the summary totals plus the enriched sales DataFrame.
     """
     df = get_sales()
@@ -215,29 +284,22 @@ def get_profit_summary() -> dict:
     df = df.copy()
     df["Total_Sale"] = pd.to_numeric(df.get("Total_Sale", 0), errors="coerce").fillna(0)
     df["Quantity"] = pd.to_numeric(df.get("Quantity", 0), errors="coerce").fillna(0)
+    if "Product_ID" not in df.columns:
+        df["Product_ID"] = "-"
 
-    if "Cost_of_Goods" in df.columns:
-        df["Cost_of_Goods"] = pd.to_numeric(df["Cost_of_Goods"], errors="coerce").fillna(0)
-    else:
-        df["Cost_of_Goods"] = 0.0
+    cost_lookup = get_product_cost_lookup()
 
-    # Fallback for legacy rows (Cost_of_Goods missing/0): join Products on Product_ID.
-    needs_fallback = df["Cost_of_Goods"] <= 0
-    if needs_fallback.any() and "Product_ID" in df.columns:
-        products_df = fetch_worksheet_data("Products")
-        if not products_df.empty and "Product_ID" in products_df.columns and "Cost_Price" in products_df.columns:
-            cost_map = dict(zip(
-                products_df["Product_ID"].astype(str).str.strip(),
-                pd.to_numeric(products_df["Cost_Price"], errors="coerce").fillna(0)
-            ))
-            fallback_cost = df.loc[needs_fallback, "Product_ID"].astype(str).str.strip().map(cost_map).fillna(0)
-            df.loc[needs_fallback, "Cost_of_Goods"] = fallback_cost * df.loc[needs_fallback, "Quantity"]
+    def _line(row):
+        return compute_line_cost_and_profit(row["Product_ID"], row["Quantity"], row["Total_Sale"], cost_lookup)
 
-    if "Profit" in df.columns:
-        df["Profit"] = pd.to_numeric(df["Profit"], errors="coerce").fillna(0)
-        df.loc[needs_fallback, "Profit"] = df.loc[needs_fallback, "Total_Sale"] - df.loc[needs_fallback, "Cost_of_Goods"]
-    else:
-        df["Profit"] = df["Total_Sale"] - df["Cost_of_Goods"]
+    results = df.apply(_line, axis=1, result_type="expand")
+    results.columns = ["Cost_of_Goods", "Profit"]
+    df["Cost_of_Goods"] = results["Cost_of_Goods"]
+    df["Profit"] = results["Profit"]
+    df["Profit_Margin_%"] = df.apply(
+        lambda r: round(r["Profit"] / r["Total_Sale"] * 100.0, 1) if r["Total_Sale"] > 0 else 0.0,
+        axis=1
+    )
 
     revenue = float(df["Total_Sale"].sum())
     cogs = float(df["Cost_of_Goods"].sum())
@@ -245,3 +307,41 @@ def get_profit_summary() -> dict:
     margin = (profit / revenue * 100.0) if revenue > 0 else 0.0
 
     return {"revenue": revenue, "cogs": cogs, "profit": profit, "margin": margin, "df": df}
+
+def get_products_with_margin() -> pd.DataFrame:
+    """
+    Returns the full Products sheet enriched with Profit_Margin_% and
+    Est_Profit_Per_Unit, using the same cost-price-or-commission logic as
+    get_profit_summary(), so the Products page can show unit price, product
+    ID, and profit margin per product at a glance.
+    """
+    df = fetch_worksheet_data("Products")
+    if df.empty:
+        return df
+    df = df.copy()
+    for col in ["Cost_Price", "Selling_Price", "Commission_Value", "Current_Stock"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+    def _margin_and_profit(row):
+        selling = row.get("Selling_Price", 0)
+        cost = row.get("Cost_Price", 0)
+        if selling <= 0:
+            return 0.0, 0.0
+        if cost > 0:
+            profit = selling - cost
+        else:
+            profit = calculate_zen_revenue(
+                gross_sale=selling,
+                quantity=1,
+                commission_type=row.get("Commission_Type", "Percentage") or "Percentage",
+                commission_value=row.get("Commission_Value", 0),
+            )
+        margin_pct = round(profit / selling * 100.0, 1)
+        return margin_pct, round(profit, 2)
+
+    margins = df.apply(_margin_and_profit, axis=1, result_type="expand")
+    margins.columns = ["Profit_Margin_%", "Est_Profit_Per_Unit"]
+    df["Profit_Margin_%"] = margins["Profit_Margin_%"]
+    df["Est_Profit_Per_Unit"] = margins["Est_Profit_Per_Unit"]
+    return df
