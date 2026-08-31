@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from services.data_service import get_sales
+from services.data_service import get_sales, get_profit_summary
 
 st.set_page_config(page_title="Reports", page_icon="📈", layout="wide")
 
@@ -64,10 +64,18 @@ else:
         month_df = df[df["Date_Str"].str.startswith(current_month_str)]
         total_revenue_month = month_df["Total_Sale"].sum()
 
-        col1, col2, col3 = st.columns(3)
+        profit_summary = get_profit_summary()
+        profit_month = 0.0
+        if not profit_summary["df"].empty:
+            p_df = profit_summary["df"]
+            p_df["Date_Str"] = p_df["Date"].astype(str).str.slice(0, 10)
+            profit_month = p_df[p_df["Date_Str"].str.startswith(current_month_str)]["Profit"].sum()
+
+        col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Sales Today", f"{total_sales_today:,.2f} ETB")
         col2.metric("Items Sold Today", int(items_sold_today))
         col3.metric("Total Revenue (Month)", f"{total_revenue_month:,.2f} ETB")
+        col4.metric("💰 Profit (Month)", f"{profit_month:,.2f} ETB")
 
         st.markdown("---")
 
