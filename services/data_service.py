@@ -1,152 +1,198 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo
+# services/data_service.py
 import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
-from services.google_sheets import fetch_worksheet_data, write_row, update_data
+from datetime import datetime
+import json
 
-TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
-
-def get_products() -> pd.DataFrame:
-    """Fetches active products from the Google Sheet."""
-    df = fetch_worksheet_data("Products")
-    if not df.empty and "Status" in df.columns:
-        return df[df["Status"] == "Active"]
-    elif not df.empty and "Active" in df.columns:
-        return df[df["Active"].astype(str).str.upper() == "TRUE"]
-    return df
-
-def get_settings() -> dict:
-    """Reads key-value settings from the Settings sheet."""
-    defaults = {
-        "Default_Low_Stock_Threshold": "5",
-        "Currency": "ETB"
-    }
+# Load credentials from secrets
+def get_gs_client():
+    """Get Google Sheets client using credentials from secrets.toml"""
     try:
-        df = fetch_worksheet_data("Settings")
-        if not df.empty:
-            for _, row in df.iterrows():
-                if len(row) >= 2:
-                    k = str(row.iloc[0]).strip()
-                    v = str(row.iloc[1]).strip()
-                    if k:
-                        defaults[k] = v
+        # Using the credentials from secrets.toml
+        scope = ['https://spreadsheets.google.com/feeds',
+                 'https://www.googleapis.com/auth/drive']
+        
+        # Create credentials from the secrets dict
+        creds_dict = {
+            "type": st.secrets["gcp_service_account"]["type"],
+            "project_id": st.secrets["gcp_service_account"]["project_id"],
+            "private_key_id": st.secrets["gcp_service_account"]["private_key_id"],
+            "private_key": st.secrets["gcp_service_account"]["private_key"],
+            "client_email": st.secrets["gcp_service_account"]["client_email"],
+            "client_id": st.secrets["gcp_service_account"]["client_id"],
+            "auth_uri": st.secrets["gcp_service_account"]["auth_uri"],
+            "token_uri": st.secrets["gcp_service_account"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["gcp_service_account"]["client_x509_cert_url"],
+            "universe_domain": st.secrets["gcp_service_account"]["universe_domain"]
+        }
+        
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        return client
     except Exception as e:
-        st.warning(f"Error loading settings: {e}")
-    return defaults
+        st.error(f"Error connecting to Google Sheets: {e}")
+        return None
 
-def save_settings(currency: str, low_stock_threshold: int) -> bool:
-    """
-    Overwrites key-value settings in Settings tab and updates 
-    Low_Stock_Threshold column for all products in Products tab.
-    """
-    # 1. Update Settings tab
-    settings_df = pd.DataFrame([
-        ["Default_Low_Stock_Threshold", str(low_stock_threshold)],
-        ["Currency", str(currency)]
-    ], columns=["Key", "Value"])
-    
-    s_success = update_data("Settings", settings_df)
-
-    # 2. Bulk update Low_Stock_Threshold in Products tab
+def get_sales():
+    """Fetch sales data from Google Sheets"""
     try:
-        products_df = fetch_worksheet_data("Products")
-        if not products_df.empty and "Low_Stock_Threshold" in products_df.columns:
-            products_df["Low_Stock_Threshold"] = str(low_stock_threshold)
-            update_data("Products", products_df)
+        client = get_gs_client()
+        if client is None:
+            return pd.DataFrame()
+        
+        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        sheet = client.open_by_key(spreadsheet_id)
+        
+        # Try to get the Sales sheet
+        try:
+            worksheet = sheet.worksheet("Sales")
+        except:
+            # If Sales sheet doesn't exist, create it
+            worksheet = sheet.add_worksheet(title="Sales", rows="1000", cols="20")
+            # Add headers
+            headers = ["Sale_ID", "Date", "Product_ID", "Company", "Product_Name", 
+                      "Quantity", "Unit_Selling_Price", "Zen_Revenue", "Cost_of_Goods",
+                      "Profit", "Payment_Method", "Buyer", "Receptionist", "Notes"]
+            worksheet.append_row(headers)
+        
+        data = worksheet.get_all_records()
+        df = pd.DataFrame(data)
+        
+        # Ensure numeric columns are properly typed
+        for col in ["Quantity", "Unit_Selling_Price", "Zen_Revenue", "Cost_of_Goods", "Profit"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+        
+        return df
     except Exception as e:
-        st.warning(f"Settings saved, but updating Products sheet failed: {e}")
+        st.error(f"Error fetching sales: {e}")
+        return pd.DataFrame()
 
-    st.cache_data.clear()
-    return s_success
+def get_products():
+    """Fetch products from Google Sheets - uses the Zen Shop Excel data structure"""
+    try:
+        client = get_gs_client()
+        if client is None:
+            return pd.DataFrame()
+        
+        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        sheet = client.open_by_key(spreadsheet_id)
+        
+        # Get all sheets and combine product data
+        all_products = []
+        
+        # List of sheets that contain product data
+        product_sheets = ["Sabahar", "Phone Case", "Leyu", "Hanfala Leather", 
+                         "Elegance & Mela Studio", "Elisabeth Oil & Soap", 
+                         "More Coffee & Ethio JAZZ", "Tilla Product", "Kalon Scarf",
+                         "Nishan Honey", "Kuncho Leather", "Araya", "TruLove Granola",
+                         "Afropian", "Yohannnes wood"]
+        
+        for sheet_name in product_sheets:
+            try:
+                worksheet = sheet.worksheet(sheet_name)
+                data = worksheet.get_all_records()
+                
+                # Try to identify columns
+                if data:
+                    headers = data[0].keys() if data else []
+                    
+                    # Find relevant columns
+                    id_col = None
+                    desc_col = None
+                    qty_col = None
+                    price_col = None
+                    buying_col = None
+                    
+                    for h in headers:
+                        h_lower = h.lower()
+                        if "id" in h_lower or "code" in h_lower or "nb" in h_lower:
+                            id_col = h
+                        if "description" in h_lower or "describ" in h_lower or "product" in h_lower:
+                            desc_col = h
+                        if "qty" in h_lower or "quantity" in h_lower:
+                            qty_col = h
+                        if "selling" in h_lower or "zen price" in h_lower or "price" in h_lower:
+                            price_col = h
+                        if "buying" in h_lower or "unit price" in h_lower or "cost" in h_lower:
+                            buying_col = h
+                    
+                    # Extract products
+                    for row in data:
+                        if row.get(qty_col, 0) > 0:
+                            product = {
+                                "Company": sheet_name,
+                                "Product_ID": row.get(id_col, ""),
+                                "Product_Name": row.get(desc_col, ""),
+                                "Quantity": row.get(qty_col, 0),
+                                "Unit_Selling_Price": row.get(price_col, 0),
+                                "Buying_Price": row.get(buying_col, 0),
+                                "Zen_Price": row.get(price_col, 0)  # Zen Revenue is the selling price
+                            }
+                            # Clean up
+                            if product["Product_Name"] and product["Product_ID"]:
+                                all_products.append(product)
+            except Exception as e:
+                # Skip sheets that don't exist or can't be read
+                continue
+        
+        df = pd.DataFrame(all_products)
+        return df
+    except Exception as e:
+        st.error(f"Error fetching products: {e}")
+        return pd.DataFrame()
 
-def adjust_stock(
-    product_id: str,
-    quantity_change: int,
-    transaction_type: str = "Restock",
-    receptionist: str = "-",
-    reason: str = "-"
-) -> bool:
-    """Updates stock levels in Products sheet and logs to Inventory_Transactions."""
-    now = datetime.now(TIMEZONE)
-    date_only = now.strftime("%Y-%m-%d")
-    timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
-    txn_id = now.strftime("TXN-%Y%m%d%H%M%S")
-
-    products_df = fetch_worksheet_data("Products")
-    if products_df.empty or "Product_ID" not in products_df.columns:
-        st.error("Products sheet is empty or missing Product_ID column.")
+def record_sale(product_id, company, product_name, quantity, unit_price, buying_price, 
+               zen_revenue, total_amount, cost_of_goods, payment_method, 
+               buyer_name, receptionist, notes):
+    """Record a sale in Google Sheets"""
+    try:
+        client = get_gs_client()
+        if client is None:
+            return False
+        
+        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        sheet = client.open_by_key(spreadsheet_id)
+        
+        # Get or create Sales sheet
+        try:
+            worksheet = sheet.worksheet("Sales")
+        except:
+            worksheet = sheet.add_worksheet(title="Sales", rows="1000", cols="20")
+            headers = ["Sale_ID", "Date", "Product_ID", "Company", "Product_Name", 
+                      "Quantity", "Unit_Selling_Price", "Zen_Revenue", "Cost_of_Goods",
+                      "Profit", "Payment_Method", "Buyer", "Receptionist", "Notes"]
+            worksheet.append_row(headers)
+        
+        # Generate Sale ID
+        sale_id = f"SALE_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        profit = zen_revenue - cost_of_goods
+        
+        # Prepare row
+        row = [
+            sale_id,
+            date,
+            product_id,
+            company,
+            product_name,
+            quantity,
+            unit_price,  # Unit Selling Price (Zen Revenue per unit)
+            zen_revenue,  # Total Zen Revenue
+            cost_of_goods,  # Total Cost
+            profit,  # Profit
+            payment_method,
+            buyer_name or "",
+            receptionist or "",
+            notes or ""
+        ]
+        
+        # Append to sheet
+        worksheet.append_row(row)
+        return True
+    except Exception as e:
+        st.error(f"Error recording sale: {e}")
         return False
-
-    match_idx = products_df.index[products_df["Product_ID"].astype(str).str.strip() == str(product_id).strip()].tolist()
-    if not match_idx:
-        st.error(f"Product ID '{product_id}' not found in Google Sheet.")
-        return False
-
-    row_i = match_idx[0]
-    company = str(products_df.loc[row_i, "Company"]) if "Company" in products_df.columns else "-"
-    product_name = str(products_df.loc[row_i, "Product_Name"]) if "Product_Name" in products_df.columns else "-"
-
-    qty_change = int(quantity_change)
-    if transaction_type in ["Damage", "Waste", "Personal Use", "Deduction", "Sale"] and qty_change > 0:
-        qty_change = -qty_change
-
-    current_val = pd.to_numeric(products_df.loc[row_i, "Current_Stock"], errors="coerce")
-    current_val = 0 if pd.isna(current_val) else int(current_val)
-    new_stock = max(0, current_val + qty_change)
-
-    products_df.loc[row_i, "Current_Stock"] = new_stock
-    prod_success = update_data("Products", products_df)
-
-    inv_row = [
-        txn_id, date_only, product_id, company, product_name,
-        transaction_type, qty_change, reason if reason else "-",
-        receptionist if receptionist else "-", timestamp_str
-    ]
-    try:
-        write_row("Inventory_Transactions", inv_row)
-    except Exception as e:
-        st.warning(f"Stock updated, but transaction logging failed: {e}")
-
-    st.cache_data.clear()
-    return prod_success
-
-def record_sale(
-    product_id: str = "-",
-    company: str = "-",
-    product_name: str = "-",
-    quantity: int = 1,
-    unit_price: float = 0.0,
-    total_amount: float = 0.0,
-    payment_method: str = "Cash",
-    buyer_name: str = "-",
-    notes: str = "-",
-    *args,
-    **kwargs
-) -> bool:
-    """Appends sale record and reduces stock count."""
-    now = datetime.now(TIMEZONE)
-    date_only = now.strftime("%Y-%m-%d")         
-    sale_id = now.strftime("S-%Y%m%d%H%M%S")     
-    
-    calc_total = float(total_amount) if total_amount > 0 else float(quantity) * float(unit_price)
-
-    sales_row = [
-        sale_id, date_only, product_id, company, product_name,
-        int(quantity), float(unit_price), calc_total,
-        "-", payment_method, buyer_name, "-", notes
-    ]
-    sales_success = write_row("Sales", sales_row)
-
-    adjust_stock(
-        product_id=product_id,
-        quantity_change=-int(quantity),
-        transaction_type="Sale",
-        receptionist="-",
-        reason=f"Sale ({sale_id})"
-    )
-
-    return sales_success
-
-def get_sales() -> pd.DataFrame:
-    """Fetches all recorded sales from the Google Sheet."""
-    return fetch_worksheet_data("Sales")
