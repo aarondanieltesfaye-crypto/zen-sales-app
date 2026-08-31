@@ -112,7 +112,7 @@ else:
         st.markdown("---")
         st.subheader("📋 Sale-by-Sale Breakdown")
         display_cols = [c for c in [
-            "Sale_ID", "Date", "Company", "Product_Name", "Quantity",
+            "Sale_ID", "Date", "Product_ID", "Company", "Product_Name", "Quantity",
             "Unit_Price", "Total_Sale", "Cost_of_Goods", "Profit", "Profit_Margin_%",
             "Payment_Method", "Receptionist"
         ] if c in df.columns]
