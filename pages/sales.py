@@ -81,7 +81,7 @@ else:
         
         with col3:
             quantity = st.number_input("Quantity", min_value=1, value=1)
-            payment_method = st.selectbox("Payment Method", ["Cash", "Bank Transfer", "Credit"])
+            payment_method = st.selectbox("Payment Method", ["Cash", "Card", "Bank Transfer", "Credit"])
         
         with col4:
             buyer_name = st.text_input("Buyer Name (Optional)")
