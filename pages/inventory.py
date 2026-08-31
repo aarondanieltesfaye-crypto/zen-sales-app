@@ -40,38 +40,41 @@ if products_df.empty:
 else:
     product_options = {}
     for _, row in products_df.iterrows():
-        p_id = str(row.get("Product_ID", ""))
-        p_name = str(row.get("Product_Name", ""))
+        p_id = str(row.get("Product_ID", "")).strip()
+        p_name = str(row.get("Product_Name", "")).strip()
         curr_stock = str(row.get("Current_Stock", "0"))
-        if p_id:
+        if p_id and p_id.lower() != "nan":
             product_options[f"{p_id} - {p_name} (Current Stock: {curr_stock})"] = p_id
 
-    with st.container(border=True):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            selected_label = st.selectbox("Product ID / Name", list(product_options.keys()))
-            selected_pid = product_options[selected_label]
-            transaction_type = st.selectbox("Transaction Type", ["Restock", "Damage", "Waste", "Personal Use", "Correction"])
+    if not product_options:
+        st.warning("No products with a valid Product_ID were found. Check that the 'Product_ID' column in the Products sheet is filled in for your active products.")
+    else:
+        with st.container(border=True):
+            col1, col2 = st.columns(2)
             
-        with col2:
-            quantity_change = st.number_input("Quantity Change", min_value=1, value=1)
-            receptionist = st.text_input("Receptionist Name", value="-")
+            with col1:
+                selected_label = st.selectbox("Product ID / Name", list(product_options.keys()))
+                selected_pid = product_options[selected_label]
+                transaction_type = st.selectbox("Transaction Type", ["Restock", "Damage", "Waste", "Personal Use", "Correction"])
+                
+            with col2:
+                quantity_change = st.number_input("Quantity Change", min_value=1, value=1)
+                receptionist = st.text_input("Receptionist Name", value="-")
 
-        reason = st.text_area("Reason / Notes", value="")
+            reason = st.text_area("Reason / Notes", value="")
 
-        if st.button("Update Stock"):
-            if adjust_stock(
-                product_id=selected_pid,
-                quantity_change=quantity_change,
-                transaction_type=transaction_type,
-                receptionist=receptionist,
-                reason=reason
-            ):
-                st.success(f"Inventory successfully updated for product '{selected_pid}'!")
-                st.rerun()
-            else:
-                st.error("Failed to update inventory. Please check connection.")
+            if st.button("Update Stock"):
+                if adjust_stock(
+                    product_id=selected_pid,
+                    quantity_change=quantity_change,
+                    transaction_type=transaction_type,
+                    receptionist=receptionist,
+                    reason=reason
+                ):
+                    st.success(f"Inventory successfully updated for product '{selected_pid}'!")
+                    st.rerun()
+                else:
+                    st.error("Failed to update inventory. Please check connection.")
 
 st.markdown("---")
 st.subheader("📜 Recent Inventory Transactions")
