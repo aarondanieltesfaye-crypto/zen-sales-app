@@ -5,12 +5,21 @@ from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 from datetime import datetime
 import json
+import re
 
-# Load credentials from secrets
 def get_gs_client():
     """Get Google Sheets client using credentials from secrets.toml"""
     try:
-        # Using the credentials from secrets.toml
+        # Check if secrets are available
+        if not hasattr(st, 'secrets'):
+            st.error("Streamlit secrets not available. Please check your configuration.")
+            return None
+        
+        # Check if gcp_service_account section exists
+        if "gcp_service_account" not in st.secrets:
+            st.error("'gcp_service_account' not found in secrets.toml. Please add it.")
+            return None
+        
         scope = ['https://spreadsheets.google.com/feeds',
                  'https://www.googleapis.com/auth/drive']
         
@@ -26,7 +35,7 @@ def get_gs_client():
             "token_uri": st.secrets["gcp_service_account"]["token_uri"],
             "auth_provider_x509_cert_url": st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
             "client_x509_cert_url": st.secrets["gcp_service_account"]["client_x509_cert_url"],
-            "universe_domain": st.secrets["gcp_service_account"]["universe_domain"]
+            "universe_domain": st.secrets["gcp_service_account"].get("universe_domain", "googleapis.com")
         }
         
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -36,6 +45,18 @@ def get_gs_client():
         st.error(f"Error connecting to Google Sheets: {e}")
         return None
 
+def get_spreadsheet_id():
+    """Get spreadsheet ID from secrets"""
+    try:
+        if "app" in st.secrets and "spreadsheet_id" in st.secrets["app"]:
+            return st.secrets["app"]["spreadsheet_id"]
+        else:
+            st.error("'spreadsheet_id' not found in secrets.toml under [app] section.")
+            return None
+    except Exception as e:
+        st.error(f"Error reading spreadsheet ID: {e}")
+        return None
+
 def get_sales():
     """Fetch sales data from Google Sheets"""
     try:
@@ -43,7 +64,10 @@ def get_sales():
         if client is None:
             return pd.DataFrame()
         
-        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        spreadsheet_id = get_spreadsheet_id()
+        if spreadsheet_id is None:
+            return pd.DataFrame()
+        
         sheet = client.open_by_key(spreadsheet_id)
         
         # Try to get the Sales sheet
@@ -52,7 +76,6 @@ def get_sales():
         except:
             # If Sales sheet doesn't exist, create it
             worksheet = sheet.add_worksheet(title="Sales", rows="1000", cols="20")
-            # Add headers
             headers = ["Sale_ID", "Date", "Product_ID", "Company", "Product_Name", 
                       "Quantity", "Unit_Selling_Price", "Zen_Revenue", "Cost_of_Goods",
                       "Profit", "Payment_Method", "Buyer", "Receptionist", "Notes"]
@@ -78,7 +101,10 @@ def get_products():
         if client is None:
             return pd.DataFrame()
         
-        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        spreadsheet_id = get_spreadsheet_id()
+        if spreadsheet_id is None:
+            return pd.DataFrame()
+        
         sheet = client.open_by_key(spreadsheet_id)
         
         # Get all sheets and combine product data
@@ -123,23 +149,30 @@ def get_products():
                     # Extract products
                     for row in data:
                         if row.get(qty_col, 0) > 0:
-                            product = {
-                                "Company": sheet_name,
-                                "Product_ID": row.get(id_col, ""),
-                                "Product_Name": row.get(desc_col, ""),
-                                "Quantity": row.get(qty_col, 0),
-                                "Unit_Selling_Price": row.get(price_col, 0),
-                                "Buying_Price": row.get(buying_col, 0),
-                                "Zen_Price": row.get(price_col, 0)  # Zen Revenue is the selling price
-                            }
-                            # Clean up
-                            if product["Product_Name"] and product["Product_ID"]:
+                            # Get product name, clean it up
+                            product_name = str(row.get(desc_col, "")).strip()
+                            if product_name and product_name not in ["", "None", "nan"]:
+                                product = {
+                                    "Company": sheet_name,
+                                    "Product_ID": str(row.get(id_col, "")).strip(),
+                                    "Product_Name": product_name,
+                                    "Quantity": float(row.get(qty_col, 0)) if row.get(qty_col, 0) else 0,
+                                    "Unit_Selling_Price": float(row.get(price_col, 0)) if row.get(price_col, 0) else 0,
+                                    "Buying_Price": float(row.get(buying_col, 0)) if row.get(buying_col, 0) else 0,
+                                    "Zen_Price": float(row.get(price_col, 0)) if row.get(price_col, 0) else 0
+                                }
                                 all_products.append(product)
             except Exception as e:
                 # Skip sheets that don't exist or can't be read
                 continue
         
         df = pd.DataFrame(all_products)
+        
+        # Clean up - remove products with missing names
+        if not df.empty:
+            df = df[df["Product_Name"].notna() & (df["Product_Name"] != "")]
+            df = df[df["Product_Name"].str.strip() != ""]
+        
         return df
     except Exception as e:
         st.error(f"Error fetching products: {e}")
@@ -154,7 +187,10 @@ def record_sale(product_id, company, product_name, quantity, unit_price, buying_
         if client is None:
             return False
         
-        spreadsheet_id = st.secrets["app"]["spreadsheet_id"]
+        spreadsheet_id = get_spreadsheet_id()
+        if spreadsheet_id is None:
+            return False
+        
         sheet = client.open_by_key(spreadsheet_id)
         
         # Get or create Sales sheet
@@ -176,18 +212,18 @@ def record_sale(product_id, company, product_name, quantity, unit_price, buying_
         row = [
             sale_id,
             date,
-            product_id,
-            company,
-            product_name,
-            quantity,
-            unit_price,  # Unit Selling Price (Zen Revenue per unit)
-            zen_revenue,  # Total Zen Revenue
-            cost_of_goods,  # Total Cost
-            profit,  # Profit
-            payment_method,
-            buyer_name or "",
-            receptionist or "",
-            notes or ""
+            str(product_id),
+            str(company),
+            str(product_name),
+            float(quantity),
+            float(unit_price),
+            float(zen_revenue),
+            float(cost_of_goods),
+            float(profit),
+            str(payment_method),
+            str(buyer_name) if buyer_name else "",
+            str(receptionist) if receptionist else "",
+            str(notes) if notes else ""
         ]
         
         # Append to sheet
