@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 from services.google_sheets import fetch_worksheet_data, write_row_by_headers, update_data
 from utils.calculations import calculate_zen_revenue
+from utils.pricing import get_buying_price, get_selling_price
 
 TIMEZONE = ZoneInfo("Africa/Addis_Ababa")
 
@@ -22,6 +23,7 @@ INVENTORY_HEADERS = [
     "Transaction_Type", "Quantity_Change", "Reason", "Receptionist", "Timestamp"
 ]
 
+
 def get_products() -> pd.DataFrame:
     """Fetches active products from the Google Sheet."""
     df = fetch_worksheet_data("Products")
@@ -30,6 +32,7 @@ def get_products() -> pd.DataFrame:
     elif not df.empty and "Active" in df.columns:
         return df[df["Active"].astype(str).str.upper() == "TRUE"]
     return df
+
 
 def get_settings() -> dict:
     """Reads key-value settings from the Settings sheet."""
@@ -50,20 +53,19 @@ def get_settings() -> dict:
         st.warning(f"Error loading settings: {e}")
     return defaults
 
+
 def save_settings(currency: str, low_stock_threshold: int) -> bool:
     """
-    Overwrites key-value settings in Settings tab and updates 
+    Overwrites key-value settings in Settings tab and updates
     Low_Stock_Threshold column for all products in Products tab.
     """
-    # 1. Update Settings tab
     settings_df = pd.DataFrame([
         ["Default_Low_Stock_Threshold", str(low_stock_threshold)],
         ["Currency", str(currency)]
     ], columns=["Key", "Value"])
-    
+
     s_success = update_data("Settings", settings_df)
 
-    # 2. Bulk update Low_Stock_Threshold in Products tab
     try:
         products_df = fetch_worksheet_data("Products")
         if not products_df.empty and "Low_Stock_Threshold" in products_df.columns:
@@ -74,6 +76,7 @@ def save_settings(currency: str, low_stock_threshold: int) -> bool:
 
     st.cache_data.clear()
     return s_success
+
 
 def adjust_stock(
     product_id: str,
@@ -137,6 +140,7 @@ def adjust_stock(
     st.cache_data.clear()
     return prod_success
 
+
 def record_sale(
     product_id: str = "-",
     company: str = "-",
@@ -156,10 +160,10 @@ def record_sale(
     """
     Appends a sale record (including cost/profit) and reduces stock count.
 
-    Previously buying_price/cost_of_goods were accepted by callers but were
-    silently swallowed by **kwargs and never written to the Sales sheet,
-    which is why profit could never be reliably calculated. They're now
-    captured, used to compute Profit, and persisted.
+    Profit is computed as (Selling Price - Buying Price) x Quantity when a
+    buying price exists. Consignment items with no buying price still fall
+    back to the product's commission so those sales are not treated as 100%
+    profit.
     """
     now = datetime.now(TIMEZONE)
     date_only = now.strftime("%Y-%m-%d")
@@ -167,9 +171,6 @@ def record_sale(
 
     calc_total = float(total_amount) if total_amount > 0 else float(quantity) * float(unit_price)
 
-    # Prefer the true cost/commission-based calculation from the Products
-    # sheet; fall back to whatever the caller passed in if the product can't
-    # be found there.
     calc_cogs, profit = compute_line_cost_and_profit(product_id, quantity, calc_total)
     if calc_cogs == 0.0 and profit == calc_total and cost_of_goods > 0:
         calc_cogs = float(cost_of_goods)
@@ -211,20 +212,18 @@ def record_sale(
     st.cache_data.clear()
     return sales_success
 
+
 def get_sales() -> pd.DataFrame:
     """Fetches all recorded sales from the Google Sheet."""
     return fetch_worksheet_data("Sales")
 
+
 def get_product_cost_lookup() -> dict:
     """
     Returns {Product_ID: {cost_price, commission_type, commission_value, selling_price}}
-    from the Products sheet. This is the single source of truth for how much of
-    a sale is Zen's profit:
-      - If the product has a real Cost_Price (Zen owns the stock, e.g. Phone Cases,
-        Hanfala Leather), profit = Selling_Price - Cost_Price.
-      - If Cost_Price is 0 (consignment items, e.g. Sabahar, Leyu, Elegance & Mela
-        Studio), Zen doesn't buy the stock - it earns a commission instead, so
-        profit = the item's Commission_Type/Commission_Value applied to the sale.
+    from the Products sheet.
+      - If the product has a real buying price, profit = (Selling - Buying) x Qty.
+      - If buying price is 0 (consignment), Zen earns a commission instead.
     """
     products_df = fetch_worksheet_data("Products")
     lookup = {}
@@ -235,19 +234,19 @@ def get_product_cost_lookup() -> dict:
         if not pid:
             continue
         lookup[pid] = {
-            "cost_price": pd.to_numeric(p.get("Cost_Price", 0), errors="coerce") or 0.0,
-            "selling_price": pd.to_numeric(p.get("Selling_Price", 0), errors="coerce") or 0.0,
+            "cost_price": get_buying_price(p),
+            "selling_price": get_selling_price(p),
             "commission_type": p.get("Commission_Type", "Percentage") or "Percentage",
             "commission_value": pd.to_numeric(p.get("Commission_Value", 0), errors="coerce") or 0.0,
         }
     return lookup
 
+
 def compute_line_cost_and_profit(product_id: str, quantity: float, total_sale: float, cost_lookup: dict = None):
     """
-    Computes (cost_of_goods, profit) for a single sale line, using real cost
-    price when Zen owns the stock, or commission when it's a consignment item.
-    Falls back to treating the whole sale as profit if the product can't be
-    found (better to overstate profit visibly than silently hide the sale).
+    Computes (cost_of_goods, profit) for a single sale line.
+    Preferred formula when a buying price exists:
+        Profit = (Selling Price - Buying Price) x Quantity
     """
     if cost_lookup is None:
         cost_lookup = get_product_cost_lookup()
@@ -256,26 +255,27 @@ def compute_line_cost_and_profit(product_id: str, quantity: float, total_sale: f
     if not info:
         return 0.0, float(total_sale)
 
-    if info["cost_price"] > 0:
-        cogs = info["cost_price"] * float(quantity)
-        return cogs, float(total_sale) - cogs
+    buying = float(info.get("cost_price") or 0.0)
+    qty = float(quantity)
+    sale = float(total_sale)
+
+    if buying > 0:
+        cogs = buying * qty
+        return cogs, sale - cogs
 
     profit = calculate_zen_revenue(
-        gross_sale=float(total_sale),
-        quantity=float(quantity),
+        gross_sale=sale,
+        quantity=qty,
         commission_type=info["commission_type"],
         commission_value=info["commission_value"],
     )
-    return float(total_sale) - profit, profit
+    return sale - profit, profit
+
 
 def get_profit_summary() -> dict:
     """
     Computes revenue, cost of goods, profit and margin across all sales.
-    Profit is always recomputed fresh from the Products sheet (Cost_Price for
-    owned inventory, commission for consignment items) rather than trusting
-    whatever was written at sale time - this way a fix to the Products sheet
-    (e.g. correcting a cost price) is reflected for historical sales too.
-    Returns a dict with the summary totals plus the enriched sales DataFrame.
+    Profit is always recomputed fresh from the Products sheet.
     """
     df = get_sales()
     if df.empty:
@@ -308,24 +308,24 @@ def get_profit_summary() -> dict:
 
     return {"revenue": revenue, "cogs": cogs, "profit": profit, "margin": margin, "df": df}
 
+
 def get_products_with_margin() -> pd.DataFrame:
     """
     Returns the full Products sheet enriched with Profit_Margin_% and
-    Est_Profit_Per_Unit, using the same cost-price-or-commission logic as
-    get_profit_summary(), so the Products page can show unit price, product
-    ID, and profit margin per product at a glance.
+    Est_Profit_Per_Unit, using Buying price when present and commission
+    when the item is consignment.
     """
     df = fetch_worksheet_data("Products")
     if df.empty:
         return df
     df = df.copy()
-    for col in ["Cost_Price", "Selling_Price", "Commission_Value", "Current_Stock"]:
+    for col in ["Cost_Price", "Buying price", "Buying_Price", "Selling_Price", "Commission_Value", "Current_Stock"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
     def _margin_and_profit(row):
-        selling = row.get("Selling_Price", 0)
-        cost = row.get("Cost_Price", 0)
+        selling = get_selling_price(row)
+        cost = get_buying_price(row)
         if selling <= 0:
             return 0.0, 0.0
         if cost > 0:
