@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from services.data_service import get_products, adjust_stock
+from services.google_sheets import fetch_worksheet_data
 
 st.set_page_config(page_title="Adjust Stock", page_icon="📦", layout="wide")
 
@@ -71,3 +72,18 @@ else:
                 st.rerun()
             else:
                 st.error("Failed to update inventory. Please check connection.")
+
+st.markdown("---")
+st.subheader("📜 Recent Inventory Transactions")
+try:
+    inv_df = fetch_worksheet_data("Inventory_Transactions")
+    if inv_df.empty:
+        st.info("No inventory transactions logged yet. Every stock adjustment and sale will appear here automatically.")
+    else:
+        sort_col = "Timestamp" if "Timestamp" in inv_df.columns else inv_df.columns[0]
+        st.dataframe(
+            inv_df.sort_values(sort_col, ascending=False).head(25),
+            use_container_width=True
+        )
+except Exception as e:
+    st.error(f"Error loading inventory transactions: {e}")
