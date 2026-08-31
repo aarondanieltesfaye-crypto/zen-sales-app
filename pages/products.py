@@ -35,12 +35,14 @@ if products_df.empty:
 else:
     display_cols = [c for c in [
         "Product_ID", "Company", "Product_Name", "Category",
-        "Selling_Price", "Cost_Price", "Profit_Margin_%", "Est_Profit_Per_Unit",
+        "Selling_Price", "Buying price", "Cost_Price",
+        "Profit_Margin_%", "Est_Profit_Per_Unit",
         "Current_Stock", "Active"
     ] if c in products_df.columns]
 
     rename_map = {
         "Selling_Price": "Unit Price (ETB)",
+        "Buying price": "Buying price (ETB)",
         "Cost_Price": "Cost Price (ETB)",
         "Profit_Margin_%": "Profit Margin (%)",
         "Est_Profit_Per_Unit": "Est. Profit/Unit (ETB)",
@@ -57,7 +59,8 @@ else:
 
     st.dataframe(view_df, use_container_width=True, hide_index=True)
     st.caption(
-        "Profit Margin is Selling Price vs. Cost Price for products Zen owns (e.g. Phone Cases, "
-        "Hanfala Leather), or the item's commission % for consignment products with no cost price "
-        "(e.g. Sabahar, Leyu, Elegance & Mela Studio)."
+        "Unit Price is the customer selling price. Buying price is what Zen paid when that "
+        "figure is in the Products sheet. Profit per unit = Selling Price − Buying Price "
+        "when a buying price exists; otherwise the item's commission % is used "
+        "(consignment products such as most Sabahar, Leyu, and Elegance & Mela Studio)."
     )
